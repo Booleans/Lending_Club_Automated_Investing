@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://ws.lendingclub.com/" name="LendingClub_v1_4" targetNamespace="http://ws.lendingclub.com/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="https://www.lendingclub.com:443/ws/1.4?xsd=1" namespace="http://ws.lendingclub.com/" />
+    </xsd:schema>
+  </types>
+  <message name="SystemGetVersion">
+    <part name="parameters" element="tns:SystemGetVersion" />
+  </message>
+  <message name="SystemGetVersionResponse">
+    <part name="parameters" element="tns:SystemGetVersionResponse" />
+  </message>
+  <message name="ExcessiveRequestsException">
+    <part name="fault" element="tns:ExcessiveRequestsFault" />
+  </message>
+  <message name="OrderSubmitOrders">
+    <part name="parameters" element="tns:OrderSubmitOrders" />
+  </message>
+  <message name="OrderSubmitOrdersResponse">
+    <part name="parameters" element="tns:OrderSubmitOrdersResponse" />
+  </message>
+  <message name="BadArgumentException">
+    <part name="fault" element="tns:BadArgumentFault" />
+  </message>
+  <message name="MissingCredentialsException">
+    <part name="fault" element="tns:MissingCredentialsFault" />
+  </message>
+  <message name="InvalidCredentialsException">
+    <part name="fault" element="tns:InvalidCredentialsFault" />
+  </message>
+  <message name="UnauthorizedWebserviceUserException">
+    <part name="fault" element="tns:UnauthorizedWebserviceUserFault" />
+  </message>
+  <message name="OrderCreatePortfolio">
+    <part name="parameters" element="tns:OrderCreatePortfolio" />
+  </message>
+  <message name="OrderCreatePortfolioResponse">
+    <part name="parameters" element="tns:OrderCreatePortfolioResponse" />
+  </message>
+  <message name="OrderGetPortfolios">
+    <part name="parameters" element="tns:OrderGetPortfolios" />
+  </message>
+  <message name="OrderGetPortfoliosResponse">
+    <part name="parameters" element="tns:OrderGetPortfoliosResponse" />
+  </message>
+  <message name="LoanBrowseLoans">
+    <part name="parameters" element="tns:LoanBrowseLoans" />
+  </message>
+  <message name="LoanBrowseLoansResponse">
+    <part name="parameters" element="tns:LoanBrowseLoansResponse" />
+  </message>
+  <portType name="LendingClub_v1_4">
+    <operation name="SystemGetVersion">
+      <input message="tns:SystemGetVersion" />
+      <output message="tns:SystemGetVersionResponse" />
+      <fault name="ExcessiveRequestsException" message="tns:ExcessiveRequestsException" />
+    </operation>
+    <operation name="OrderSubmitOrders">
+      <input message="tns:OrderSubmitOrders" />
+      <output message="tns:OrderSubmitOrdersResponse" />
+      <fault name="BadArgumentException" message="tns:BadArgumentException" />
+      <fault name="MissingCredentialsException" message="tns:MissingCredentialsException" />
+      <fault name="InvalidCredentialsException" message="tns:InvalidCredentialsException" />
+      <fault name="ExcessiveRequestsException" message="tns:ExcessiveRequestsException" />
+      <fault name="UnauthorizedWebserviceUserException" message="tns:UnauthorizedWebserviceUserException" />
+    </operation>
+    <operation name="OrderCreatePortfolio">
+      <input message="tns:OrderCreatePortfolio" />
+      <output message="tns:OrderCreatePortfolioResponse" />
+      <fault name="BadArgumentException" message="tns:BadArgumentException" />
+      <fault name="MissingCredentialsException" message="tns:MissingCredentialsException" />
+      <fault name="InvalidCredentialsException" message="tns:InvalidCredentialsException" />
+      <fault name="ExcessiveRequestsException" message="tns:ExcessiveRequestsException" />
+      <fault name="UnauthorizedWebserviceUserException" message="tns:UnauthorizedWebserviceUserException" />
+    </operation>
+    <operation name="OrderGetPortfolios">
+      <input message="tns:OrderGetPortfolios" />
+      <output message="tns:OrderGetPortfoliosResponse" />
+      <fault name="BadArgumentException" message="tns:BadArgumentException" />
+      <fault name="MissingCredentialsException" message="tns:MissingCredentialsException" />
+      <fault name="InvalidCredentialsException" message="tns:InvalidCredentialsException" />
+      <fault name="ExcessiveRequestsException" message="tns:ExcessiveRequestsException" />
+      <fault name="UnauthorizedWebserviceUserException" message="tns:UnauthorizedWebserviceUserException" />
+    </operation>
+    <operation name="LoanBrowseLoans">
+      <input message="tns:LoanBrowseLoans" />
+      <output message="tns:LoanBrowseLoansResponse" />
+      <fault name="MissingCredentialsException" message="tns:MissingCredentialsException" />
+      <fault name="InvalidCredentialsException" message="tns:InvalidCredentialsException" />
+      <fault name="ExcessiveRequestsException" message="tns:ExcessiveRequestsException" />
+      <fault name="UnauthorizedWebserviceUserException" message="tns:UnauthorizedWebserviceUserException" />
+    </operation>
+  </portType>
+  <binding name="LendingClub_v1_4PortBinding" type="tns:LendingClub_v1_4">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="SystemGetVersion">
+      <soap:operation soapAction="SystemGetVersion" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="ExcessiveRequestsException">
+        <soap:fault use="literal" name="ExcessiveRequestsException" namespace="" />
+      </fault>
+    </operation>
+    <operation name="OrderSubmitOrders">
+      <soap:operation soapAction="OrderSubmitOrders" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="BadArgumentException">
+        <soap:fault use="literal" name="BadArgumentException" namespace="" />
+      </fault>
+      <fault name="MissingCredentialsException">
+        <soap:fault use="literal" name="MissingCredentialsException" namespace="" />
+      </fault>
+      <fault name="InvalidCredentialsException">
+        <soap:fault use="literal" name="InvalidCredentialsException" namespace="" />
+      </fault>
+      <fault name="ExcessiveRequestsException">
+        <soap:fault use="literal" name="ExcessiveRequestsException" namespace="" />
+      </fault>
+      <fault name="UnauthorizedWebserviceUserException">
+        <soap:fault use="literal" name="UnauthorizedWebserviceUserException" namespace="" />
+      </fault>
+    </operation>
+    <operation name="OrderCreatePortfolio">
+      <soap:operation soapAction="OrderCreatePortfolio" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="BadArgumentException">
+        <soap:fault use="literal" name="BadArgumentException" namespace="" />
+      </fault>
+      <fault name="MissingCredentialsException">
+        <soap:fault use="literal" name="MissingCredentialsException" namespace="" />
+      </fault>
+      <fault name="InvalidCredentialsException">
+        <soap:fault use="literal" name="InvalidCredentialsException" namespace="" />
+      </fault>
+      <fault name="ExcessiveRequestsException">
+        <soap:fault use="literal" name="ExcessiveRequestsException" namespace="" />
+      </fault>
+      <fault name="UnauthorizedWebserviceUserException">
+        <soap:fault use="literal" name="UnauthorizedWebserviceUserException" namespace="" />
+      </fault>
+    </operation>
+    <operation name="OrderGetPortfolios">
+      <soap:operation soapAction="OrderGetPortfolios" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="BadArgumentException">
+        <soap:fault use="literal" name="BadArgumentException" namespace="" />
+      </fault>
+      <fault name="MissingCredentialsException">
+        <soap:fault use="literal" name="MissingCredentialsException" namespace="" />
+      </fault>
+      <fault name="InvalidCredentialsException">
+        <soap:fault use="literal" name="InvalidCredentialsException" namespace="" />
+      </fault>
+      <fault name="ExcessiveRequestsException">
+        <soap:fault use="literal" name="ExcessiveRequestsException" namespace="" />
+      </fault>
+      <fault name="UnauthorizedWebserviceUserException">
+        <soap:fault use="literal" name="UnauthorizedWebserviceUserException" namespace="" />
+      </fault>
+    </operation>
+    <operation name="LoanBrowseLoans">
+      <soap:operation soapAction="LoanBrowseLoans" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+      <fault name="MissingCredentialsException">
+        <soap:fault use="literal" name="MissingCredentialsException" namespace="" />
+      </fault>
+      <fault name="InvalidCredentialsException">
+        <soap:fault use="literal" name="InvalidCredentialsException" namespace="" />
+      </fault>
+      <fault name="ExcessiveRequestsException">
+        <soap:fault use="literal" name="ExcessiveRequestsException" namespace="" />
+      </fault>
+      <fault name="UnauthorizedWebserviceUserException">
+        <soap:fault use="literal" name="UnauthorizedWebserviceUserException" namespace="" />
+      </fault>
+    </operation>
+  </binding>
+  <service name="LendingClub_v1_4">
+    <port name="LendingClub_v1_4Port" binding="tns:LendingClub_v1_4PortBinding">
+      <soap:address location="https://www.lendingclub.com:443/ws/1.4" />
+    </port>
+  </service>
+</definitions>

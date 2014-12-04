@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://ws.lendingclub.com/" targetNamespace="http://ws.lendingclub.com/" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="BadArgumentFault" nillable="true" type="tns:BadArgumentExceptionInfo" />
+  <xs:element name="ExcessiveRequestsFault" nillable="true" type="tns:ExcessiveRequestsExceptionInfo" />
+  <xs:element name="InvalidCredentialsFault" nillable="true" type="tns:InvalidCredentialsExceptionInfo" />
+  <xs:element name="LoanBrowseLoans" type="tns:LoanBrowseLoans" />
+  <xs:element name="LoanBrowseLoansResponse" type="tns:LoanBrowseLoansResponse" />
+  <xs:element name="MissingCredentialsFault" nillable="true" type="tns:MissingCredentialsExceptionInfo" />
+  <xs:element name="OrderCreatePortfolio" type="tns:OrderCreatePortfolio" />
+  <xs:element name="OrderCreatePortfolioResponse" type="tns:OrderCreatePortfolioResponse" />
+  <xs:element name="OrderGetPortfolios" type="tns:OrderGetPortfolios" />
+  <xs:element name="OrderGetPortfoliosResponse" type="tns:OrderGetPortfoliosResponse" />
+  <xs:element name="OrderSubmitOrders" type="tns:OrderSubmitOrders" />
+  <xs:element name="OrderSubmitOrdersResponse" type="tns:OrderSubmitOrdersResponse" />
+  <xs:element name="SystemGetVersion" type="tns:SystemGetVersion" />
+  <xs:element name="SystemGetVersionResponse" type="tns:SystemGetVersionResponse" />
+  <xs:element name="UnauthorizedWebserviceUserFault" nillable="true" type="tns:UnauthorizedWebserviceUserExceptionInfo" />
+  <xs:complexType name="OrderGetPortfolios">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="aid" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="OrderGetPortfoliosResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="result" type="tns:GetPortfoliosResult" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="GetPortfoliosResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="portfolioResults" type="tns:PortfolioResult" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PortfolioResult">
+    <xs:sequence />
+    <xs:attribute name="aid" type="xs:long" use="required" />
+    <xs:attribute name="portfolioName" type="xs:string" use="required" />
+    <xs:attribute name="portfolioDescription" type="xs:string" />
+    <xs:attribute name="portfolioId" type="xs:long" use="required" />
+  </xs:complexType>
+  <xs:complexType name="BadArgumentExceptionInfo">
+    <xs:sequence />
+    <xs:attribute name="parameter" type="xs:string" use="required" />
+    <xs:attribute name="value" type="xs:string" use="required" />
+    <xs:attribute name="reason" type="xs:string" use="required" />
+  </xs:complexType>
+  <xs:complexType name="MissingCredentialsExceptionInfo">
+    <xs:sequence />
+  </xs:complexType>
+  <xs:complexType name="InvalidCredentialsExceptionInfo">
+    <xs:sequence />
+    <xs:attribute name="header" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="ExcessiveRequestsExceptionInfo">
+    <xs:sequence />
+    <xs:attribute name="ip" type="xs:string" use="required" />
+  </xs:complexType>
+  <xs:complexType name="UnauthorizedWebserviceUserExceptionInfo">
+    <xs:sequence />
+  </xs:complexType>
+  <xs:complexType name="OrderCreatePortfolio">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="portfolio" type="tns:Portfolio" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Portfolio">
+    <xs:sequence />
+    <xs:attribute name="aid" type="xs:long" use="required" />
+    <xs:attribute name="portfolioName" type="xs:string" use="required" />
+    <xs:attribute name="portfolioDescription" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="OrderCreatePortfolioResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="result" type="tns:CreatePortfolioResult" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CreatePortfolioResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="portfolioResult" type="tns:PortfolioResult" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LoanBrowseLoans">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="showAll" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LoanBrowseLoansResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="result" type="tns:BrowseLoansResult" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BrowseLoansResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="asOfDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="loans" type="tns:LoanListing" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LoanListing">
+    <xs:sequence>
+      <xs:element name="creditInfo" type="tns:CreditInfo" />
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:long" use="required" />
+    <xs:attribute name="memberId" type="xs:long" use="required" />
+    <xs:attribute name="loanAmnt" type="xs:double" use="required" />
+    <xs:attribute name="fundedAmnt" type="xs:double" use="required" />
+    <xs:attribute name="term" type="xs:int" use="required" />
+    <xs:attribute name="intRate" type="xs:double" use="required" />
+    <xs:attribute name="expDefaultRate" type="xs:double" use="required" />
+    <xs:attribute name="serviceFeeRate" type="xs:double" use="required" />
+    <xs:attribute name="installment" type="xs:double" />
+    <xs:attribute name="grade" type="tns:LoanGrade" use="required" />
+    <xs:attribute name="subGrade" type="tns:LoanSubGrade" use="required" />
+    <xs:attribute name="empLength" type="xs:int" />
+    <xs:attribute name="homeOwnership" type="tns:HomeOwnership" use="required" />
+    <xs:attribute name="otherHomeOwnership" type="xs:string" use="required" />
+    <xs:attribute name="annualInc" type="xs:double" use="required" />
+    <xs:attribute name="isIncV" type="tns:IncomeVerification" use="required" />
+    <xs:attribute name="acceptD" type="xs:dateTime" />
+    <xs:attribute name="expD" type="xs:dateTime" use="required" />
+    <xs:attribute name="listD" type="xs:dateTime" use="required" />
+    <xs:attribute name="creditPullD" type="xs:dateTime" use="required" />
+    <xs:attribute name="reviewStatusD" type="xs:dateTime" />
+    <xs:attribute name="reviewStatus" type="tns:ReviewStatus" use="required" />
+    <xs:attribute name="url" type="xs:string" use="required" />
+    <xs:attribute name="desc" type="xs:string" use="required" />
+    <xs:attribute name="purpose" type="tns:LoanPurpose" use="required" />
+    <xs:attribute name="title" type="xs:string" use="required" />
+    <xs:attribute name="addrCity" type="xs:string" use="required" />
+    <xs:attribute name="addrState" type="xs:string" use="required" />
+    <xs:attribute name="msa" type="xs:string" />
+    <xs:attribute name="investorCount" type="xs:int" />
+    <xs:attribute name="ilsExpD" type="xs:dateTime" />
+    <xs:attribute name="initialListStatus" type="xs:string" />
+    <xs:attribute name="empTitle" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="CreditInfo">
+    <xs:sequence />
+    <xs:attribute name="accNowDelinq" type="xs:int" />
+    <xs:attribute name="accOpenPast24Mths" type="xs:int" />
+    <xs:attribute name="bcOpenToBuy" type="xs:double" />
+    <xs:attribute name="percentBcGt75" type="xs:double" />
+    <xs:attribute name="bcUtil" type="xs:double" />
+    <xs:attribute name="dti" type="xs:double" />
+    <xs:attribute name="delinq2Yrs" type="xs:int" />
+    <xs:attribute name="delinqAmnt" type="xs:double" />
+    <xs:attribute name="earliestCrLine" type="xs:dateTime" />
+    <xs:attribute name="ficoRangeLow" type="xs:int" />
+    <xs:attribute name="ficoRangeHigh" type="xs:int" />
+    <xs:attribute name="inqLast6Mths" type="xs:int" />
+    <xs:attribute name="mthsSinceLastDelinq" type="xs:int" />
+    <xs:attribute name="mthsSinceLastRecord" type="xs:int" />
+    <xs:attribute name="mthsSinceRecentInq" type="xs:int" />
+    <xs:attribute name="mthsSinceRecentRevolDelinq" type="xs:int" />
+    <xs:attribute name="mthsSinceRecentBc" type="xs:int" />
+    <xs:attribute name="mortAcc" type="xs:int" />
+    <xs:attribute name="openAcc" type="xs:int" />
+    <xs:attribute name="pubRec" type="xs:int" />
+    <xs:attribute name="totalBalExMort" type="xs:double" />
+    <xs:attribute name="revolBal" type="xs:double" />
+    <xs:attribute name="revolUtil" type="xs:double" />
+    <xs:attribute name="totalBcLimit" type="xs:double" />
+    <xs:attribute name="totalAcc" type="xs:int" />
+    <xs:attribute name="totalIlHighCreditLimit" type="xs:int" />
+    <xs:attribute name="numRevAccts" type="xs:int" />
+    <xs:attribute name="mthsSinceRecentBcDlq" type="xs:int" />
+    <xs:attribute name="pubRecBankruptcies" type="xs:int" />
+    <xs:attribute name="numAcctsEver120Ppd" type="xs:int" />
+    <xs:attribute name="chargeoffWithin12Mths" type="xs:int" />
+    <xs:attribute name="collections12MthsExMed" type="xs:int" />
+    <xs:attribute name="taxLiens" type="xs:int" />
+    <xs:attribute name="mthsSinceLastMajorDerog" type="xs:int" />
+    <xs:attribute name="numSats" type="xs:int" />
+    <xs:attribute name="numTlOpPast12m" type="xs:int" />
+    <xs:attribute name="moSinRcntTl" type="xs:int" />
+    <xs:attribute name="totHiCredLim" type="xs:int" />
+    <xs:attribute name="totCurBal" type="xs:int" />
+    <xs:attribute name="avgCurBal" type="xs:int" />
+    <xs:attribute name="numBcTl" type="xs:int" />
+    <xs:attribute name="numActvBcTl" type="xs:int" />
+    <xs:attribute name="numBcSats" type="xs:int" />
+    <xs:attribute name="pctTlNvrDlq" type="xs:int" />
+    <xs:attribute name="numTl90gDpd24m" type="xs:int" />
+    <xs:attribute name="numTl30dpd" type="xs:int" />
+    <xs:attribute name="numTl120dpd2m" type="xs:int" />
+    <xs:attribute name="numIlTl" type="xs:int" />
+    <xs:attribute name="moSinOldIlAcct" type="xs:int" />
+    <xs:attribute name="numActvRevTl" type="xs:int" />
+    <xs:attribute name="moSinOldRevTlOp" type="xs:int" />
+    <xs:attribute name="moSinRcntRevTlOp" type="xs:int" />
+    <xs:attribute name="totalRevHiLim" type="xs:int" />
+    <xs:attribute name="numRevTlBalGt0" type="xs:int" />
+    <xs:attribute name="numOpRevTl" type="xs:int" />
+    <xs:attribute name="totCollAmt" type="xs:int" />
+  </xs:complexType>
+  <xs:complexType name="SystemGetVersion">
+    <xs:sequence />
+  </xs:complexType>
+  <xs:complexType name="SystemGetVersionResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="result" type="tns:VersionInfo" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="VersionInfo">
+    <xs:sequence />
+    <xs:attribute name="number" type="xs:string" use="required" />
+    <xs:attribute name="status" type="tns:VersionStatus" use="required" />
+    <xs:attribute name="decommissionDate" type="xs:dateTime" />
+    <xs:attribute name="nextNumber" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="OrderSubmitOrders">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="instructs" type="tns:OrderInstruct" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="OrderInstruct">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="orders" type="tns:Order" />
+    </xs:sequence>
+    <xs:attribute name="aid" type="xs:long" use="required" />
+  </xs:complexType>
+  <xs:complexType name="Order">
+    <xs:sequence />
+    <xs:attribute name="loanId" type="xs:long" use="required" />
+    <xs:attribute name="requestedAmount" type="xs:double" use="required" />
+    <xs:attribute name="portfolioId" type="xs:long" />
+  </xs:complexType>
+  <xs:complexType name="OrderSubmitOrdersResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="result" type="tns:SubmitOrderResult" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SubmitOrderResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="instructConfirmations" type="tns:OrderInstructConfirmation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="OrderInstructConfirmation">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="orderConfirmations" type="tns:OrderConfirmation" />
+    </xs:sequence>
+    <xs:attribute name="orderInstructId" type="xs:long" />
+  </xs:complexType>
+  <xs:complexType name="OrderConfirmation">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="executionStatus" type="tns:OrderExecutionStatus" />
+    </xs:sequence>
+    <xs:attribute name="loanId" type="xs:long" use="required" />
+    <xs:attribute name="requestedAmount" type="xs:double" use="required" />
+    <xs:attribute name="investedAmount" type="xs:double" use="required" />
+  </xs:complexType>
+  <xs:simpleType name="LoanGrade">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="A" />
+      <xs:enumeration value="B" />
+      <xs:enumeration value="C" />
+      <xs:enumeration value="D" />
+      <xs:enumeration value="E" />
+      <xs:enumeration value="F" />
+      <xs:enumeration value="G" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LoanSubGrade">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="A1" />
+      <xs:enumeration value="A2" />
+      <xs:enumeration value="A3" />
+      <xs:enumeration value="A4" />
+      <xs:enumeration value="A5" />
+      <xs:enumeration value="B1" />
+      <xs:enumeration value="B2" />
+      <xs:enumeration value="B3" />
+      <xs:enumeration value="B4" />
+      <xs:enumeration value="B5" />
+      <xs:enumeration value="C1" />
+      <xs:enumeration value="C2" />
+      <xs:enumeration value="C3" />
+      <xs:enumeration value="C4" />
+      <xs:enumeration value="C5" />
+      <xs:enumeration value="D1" />
+      <xs:enumeration value="D2" />
+      <xs:enumeration value="D3" />
+      <xs:enumeration value="D4" />
+      <xs:enumeration value="D5" />
+      <xs:enumeration value="E1" />
+      <xs:enumeration value="E2" />
+      <xs:enumeration value="E3" />
+      <xs:enumeration value="E4" />
+      <xs:enumeration value="E5" />
+      <xs:enumeration value="F1" />
+      <xs:enumeration value="F2" />
+      <xs:enumeration value="F3" />
+      <xs:enumeration value="F4" />
+      <xs:enumeration value="F5" />
+      <xs:enumeration value="G1" />
+      <xs:enumeration value="G2" />
+      <xs:enumeration value="G3" />
+      <xs:enumeration value="G4" />
+      <xs:enumeration value="G5" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="HomeOwnership">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="OWN" />
+      <xs:enumeration value="RENT" />
+      <xs:enumeration value="MORTGAGE" />
+      <xs:enumeration value="OTHER" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="IncomeVerification">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NOT_VERIFIED" />
+      <xs:enumeration value="SOURCE_VERIFIED" />
+      <xs:enumeration value="VERIFIED" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ReviewStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="APPROVED" />
+      <xs:enumeration value="NOT_APPROVED" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LoanPurpose">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="CREDIT_CARD" />
+      <xs:enumeration value="DEBT_CONSOLIDATION" />
+      <xs:enumeration value="MEDICAL" />
+      <xs:enumeration value="EDUCATIONAL" />
+      <xs:enumeration value="HOME_IMPROVEMENT" />
+      <xs:enumeration value="RENEWABLE_ENERGY" />
+      <xs:enumeration value="SMALL_BUSINESS" />
+      <xs:enumeration value="WEDDING" />
+      <xs:enumeration value="VACATION" />
+      <xs:enumeration value="MOVING" />
+      <xs:enumeration value="HOUSE" />
+      <xs:enumeration value="CAR" />
+      <xs:enumeration value="MAJOR_PURCHASE" />
+      <xs:enumeration value="OTHER" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="VersionStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ACTIVE" />
+      <xs:enumeration value="DEPRECATED" />
+      <xs:enumeration value="DECOMMISSIONED" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="OrderExecutionStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ORDER_FULFILLED" />
+      <xs:enumeration value="LOAN_AMNT_EXCEEDED" />
+      <xs:enumeration value="NOT_INFUNDING_LOAN" />
+      <xs:enumeration value="REQUESTED_AMNT_LOW" />
+      <xs:enumeration value="REQUESTED_AMNT_ROUNDED" />
+      <xs:enumeration value="AUG_BY_MERGE" />
+      <xs:enumeration value="ELIM_BY_MERGE" />
+      <xs:enumeration value="INSUFFICIENT_CASH" />
+      <xs:enumeration value="MAX_AMNT_PER_LOAN_EXCEEDED" />
+      <xs:enumeration value="MAX_PERCENT_PER_LOAN_EXCEEDED" />
+      <xs:enumeration value="MAX_PERCENT_PER_LOAN_TIME_EXCEEDED" />
+      <xs:enumeration value="MAX_AMNT_PER_LOAN_TIME_EXCEEDED" />
+      <xs:enumeration value="UNKNOWN_ERROR" />
+      <xs:enumeration value="NOT_AN_INVESTOR" />
+      <xs:enumeration value="NOT_A_VALID_INVESTMENT" />
+      <xs:enumeration value="NOTE_ADDED_TO_PORTFOLIO" />
+      <xs:enumeration value="NOT_A_VALID_PORTFOLIO" />
+      <xs:enumeration value="ERROR_ADDING_NOTE_TO_PORTFOLIO" />
+      <xs:enumeration value="SYSTEM_BUSY" />
+      <xs:enumeration value="TEMPORARILY_UNAVAILABLE" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
