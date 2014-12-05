@@ -45,8 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\AccountBalance.cs" />
-    <Compile Include="Classes\Loan.cs" />
+    <Compile Include="Classes\Account.cs" />
+    <Compile Include="Classes\Loans_Owned.cs" />
+    <Compile Include="Classes\New_Loans.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

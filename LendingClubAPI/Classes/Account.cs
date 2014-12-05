@@ -12,5 +12,6 @@ namespace LendingClubAPI
     {
         public string investorID { get; set; }
         public double availableCash { get; set; }
+        public double outstandingPrincipal { get; set; }
     }
 }

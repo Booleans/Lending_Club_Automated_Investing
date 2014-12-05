@@ -94,7 +94,7 @@ namespace LendingClubAPI
         public int totCollAmt { get; set; }
     }
 
-    public class RootObject
+    public class NewLoans
     {
         public String asOfDate { get; set; }
         public List<Loan> loans { get; set; }
