@@ -48,6 +48,7 @@
     <Compile Include="Classes\Account.cs" />
     <Compile Include="Classes\Loans_Owned.cs" />
     <Compile Include="Classes\New_Loans.cs" />
+    <Compile Include="Classes\Orders.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

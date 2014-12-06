@@ -1,40 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Channels;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
 using LendingClubAPI.Classes;
 using Newtonsoft.Json;
 
 namespace LendingClubAPI
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // Url for retrieving the latest listing of loans
             var latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
 
             // Url to retrieve the detailed list of notes owned
             var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
-            
+
             // Url to retrieve account summary, which contains value of outstanding principal
             var accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary";
 
             // Url to submit a request to buy loans
             var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
-
+           
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = new Account();
             myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl));
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
+            int numberOfLoansToBuy = (int)(accountBalance/25);
             // Total outstanding principal of account. Used to get value each state should be limited to.
             double outstandingPrincipal = myAccount.outstandingPrincipal;
             // Limit for a state is 3% of total outstanding principal.
@@ -45,11 +40,14 @@ namespace LendingClubAPI
 
             // Retrieve the latest offering of loans on the platform.
             NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
-            Console.WriteLine(latestListedLoans.loans[0].grade);
+
+            // Filter the new loans based off of my criteria. 
+            var filteredLoans = filterNewLoans(latestListedLoans.loans);
+            string output = JsonConvert.SerializeObject(filteredLoans);
             Console.Read();
         }
 
-    
+
         public static string RetrieveJsonString(string myURL)
         {
             WebRequest wrGETURL;
@@ -72,7 +70,7 @@ namespace LendingClubAPI
 
         // Method to convert JSON into account balance.
         public static Account getAccountFromJson(string inputJson)
-        {   
+        {
             Account accountDetails = JsonConvert.DeserializeObject<Account>(inputJson);
             return accountDetails;
         }
@@ -87,6 +85,32 @@ namespace LendingClubAPI
         {
             NewLoans newLoans = JsonConvert.DeserializeObject<NewLoans>(inputJson);
             return newLoans;
+        }
+
+        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans)
+        {   // Array of states to invest in. Have to calculate this manually by downloading spreadsheet.
+            string[] allowedStates =
+            {
+                "AK","AL","AR","AZ","CT",
+                "DC","DE","FL","HI","IA",
+                "ID","IN","KS","KY","LA",
+                "MD","ME","MN","MO","MS",
+                "MT","ND","NH","NM","NV",
+                "OK","OR","RI","SC","SD",
+                "TN","UT","VT","WI","WV",
+                "WY"
+            };
+
+            var filteredLoans = from l in newLoans
+                                where l.annualInc >= 60000 /*&&*/
+                                     //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
+                                     // l.inqLast6Mths == 0 &&
+                                     //(l.intRate - l.expDefaultRate - l.serviceFeeRate) > 1.0 &&
+                                     //l.mthsSinceLastDelinq < 1 &&
+                                     //allowedStates.Contains(l.addrState.ToString())
+                                     select l;
+
+            return filteredLoans;
         }
     }
 }
