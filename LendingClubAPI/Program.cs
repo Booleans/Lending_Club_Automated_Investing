@@ -31,18 +31,24 @@ namespace LendingClubAPI
             double accountBalance = myAccount.availableCash;
             int numberOfLoansToBuy = (int)(accountBalance/25);
             // Total outstanding principal of account. Used to get value each state should be limited to.
-            double outstandingPrincipal = myAccount.outstandingPrincipal;
+            //double outstandingPrincipal = myAccount.outstandingPrincipal;
             // Limit for a state is 3% of total outstanding principal.
-            double statePrincipalLimit = .03*outstandingPrincipal;
+            //double statePrincipalLimit = .03*outstandingPrincipal;
 
             // List of notes I own. Used to determine which states I should invest in. 
-            NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
+            //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
 
             // Retrieve the latest offering of loans on the platform.
             NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
 
             // Filter the new loans based off of my criteria. 
-            var filteredLoans = filterNewLoans(latestListedLoans.loans);
+            var filteredLoans = filterNewLoans(latestListedLoans.loans,numberOfLoansToBuy);
+
+            foreach (Loan loan in (filteredLoans))
+            {
+                Console.WriteLine((loan.intRate));
+            }
+
             string output = JsonConvert.SerializeObject(filteredLoans);
             Console.Read();
         }
@@ -87,7 +93,7 @@ namespace LendingClubAPI
             return newLoans;
         }
 
-        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans)
+        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn)
         {   // Array of states to invest in. Have to calculate this manually by downloading spreadsheet.
             string[] allowedStates =
             {
@@ -101,14 +107,15 @@ namespace LendingClubAPI
                 "WY"
             };
 
-            var filteredLoans = from l in newLoans
-                                where l.annualInc >= 60000 /*&&*/
-                                     //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                     // l.inqLast6Mths == 0 &&
-                                     //(l.intRate - l.expDefaultRate - l.serviceFeeRate) > 1.0 &&
-                                     //l.mthsSinceLastDelinq < 1 &&
-                                     //allowedStates.Contains(l.addrState.ToString())
-                                     select l;
+            var filteredLoans = (from l in newLoans
+                                 where l.annualInc >= 60000 &&
+                                (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
+                                (l.inqLast6Mths == 0) &&
+                                (l.intRate - l.expDefaultRate - l.serviceFeeRate) > 1.0 &&
+                                (l.mthsSinceLastDelinq == null) &&
+                                (allowedStates.Contains(l.addrState.ToString()))
+                                 orderby l.intRate descending 
+                                 select l).Take(numberOfLoansToInvestIn);
 
             return filteredLoans;
         }
