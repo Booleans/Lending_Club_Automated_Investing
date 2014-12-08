@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace LendingClubAPI.Classes
 {
-public class Order
+public class LoanForOrder
 {
     public int loanId { get; set; }
     public double requestedAmount { get; set; }
-    public int portfolioId { get; set; }
+    public int? portfolioId { get; set; }
 }
 
-public class RootObject
+public class Order
 {
     public int aid { get; set; }
-    public List<Order> orders { get; set; }
+    public List<LoanForOrder> orders { get; set; }
 }
 }
