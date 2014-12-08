@@ -116,10 +116,10 @@ namespace LendingClubAPI
 
             var filteredLoans = (from l in newLoans
                                  where l.annualInc >= 60000 &&
-                                //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                //(l.inqLast6Mths == 0) &&
-                                //(l.intRate - l.expDefaultRate - l.serviceFeeRate) > 9.0 &&
-                                //(l.mthsSinceLastDelinq == null) &&
+                                (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
+                                (l.inqLast6Mths == 0) &&
+                                (l.intRate - l.expDefaultRate - l.serviceFeeRate) > 9.0 &&
+                                (l.mthsSinceLastDelinq == null) &&
                                 (l.loanAmount < 1.02*l.revolBal) &&
                                 (allowedStates.Contains(l.addrState.ToString()))
                                  orderby l.intRate descending 
@@ -147,15 +147,29 @@ namespace LendingClubAPI
             return order;
         }
 
-        public static void submitOrder(string postURL, string jsonToSubmit)
+        public static string submitOrder(string postURL, string jsonToSubmit)
         {
-            string result = "";
-            using (var client = new WebClient())
-            {
-                client.Headers.Add("Authorization:cPSkXgXlJI1G6X6cDzWCN5FX8uY=");
-                result = client.UploadString(postURL, "POST", jsonToSubmit);
-            }
-            Console.WriteLine(result);
+            
+        var httpWebRequest = (HttpWebRequest)WebRequest.Create(postURL);
+        httpWebRequest.Headers.Add("Authorization:cPSkXgXlJI1G6X6cDzWCN5FX8uY=");
+        httpWebRequest.ContentType = "application/json; charset=utf-8";
+        httpWebRequest.Method = "POST";            
+
+        using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+        {
+            string json = jsonToSubmit;
+
+            streamWriter.Write(json);
+            // Line maybe not needed.
+            // streamWriter.Flush();
+        }
+
+        var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+        using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+        {
+            var result = streamReader.ReadToEnd();
+            return result;
+        }
         }
     }
 }
