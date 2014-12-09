@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -23,43 +24,39 @@ namespace LendingClubAPI
 
             // Url to submit a request to buy loans
             var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
-           
+
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = new Account();
             myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl));
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
-            int numberOfLoansToBuy = (int)(accountBalance/25);
-            // Total outstanding principal of account. Used to get value each state should be limited to.
-            //double outstandingPrincipal = myAccount.outstandingPrincipal;
-            // Limit for a state is 3% of total outstanding principal.
-            //double statePrincipalLimit = .03*outstandingPrincipal;
 
-            // List of notes I own. Used to determine which states I should invest in. 
-            //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
-
-            // Retrieve the latest offering of loans on the platform.
-            NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
-
-            // Filter the new loans based off of my criteria. 
-            var filteredLoans = filterNewLoans(latestListedLoans.loans,numberOfLoansToBuy);
-
-
-             Order order = new Order();
-             order = BuildOrder(filteredLoans);
-
-
-            foreach (Loan loan in (filteredLoans))
+            // We only need to search for loans if we have at least $25 to buy one. 
+            if (accountBalance >= 25)
             {
-                
-                Console.WriteLine((loan.intRate-loan.serviceFeeRate - loan.expDefaultRate ));
+                int numberOfLoansToBuy = (int) (accountBalance/25);
+                // Total outstanding principal of account. Used to get value each state should be limited to.
+                //double outstandingPrincipal = myAccount.outstandingPrincipal;
+                // Limit for a state is 3% of total outstanding principal.
+                //double statePrincipalLimit = .03*outstandingPrincipal;
+
+                // List of notes I own. Used to determine which states I should invest in. 
+                //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
+
+                // Retrieve the latest offering of loans on the platform.
+                NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
+
+                // Filter the new loans based off of my criteria. 
+                var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy);
+
+                // Create a new order to purchase the filtered loans. 
+                Order order = new Order();
+                order = BuildOrder(filteredLoans);
+
+                string output = JsonConvert.SerializeObject(order);
+                Console.WriteLine(submitOrder(submitOrderUrl, output));
             }
-
-            string output = JsonConvert.SerializeObject(order);
-            submitOrder(submitOrderUrl,output);
-            Console.Read();
         }
-
 
         public static string RetrieveJsonString(string myURL)
         {
@@ -118,7 +115,8 @@ namespace LendingClubAPI
                                  where l.annualInc >= 60000 &&
                                 (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
                                 (l.inqLast6Mths == 0) &&
-                                (l.intRate - l.expDefaultRate - l.serviceFeeRate) > 9.0 &&
+                                (l.intRate >= 12.0) &&
+                                (l.intRate <= 18.0) &&
                                 (l.mthsSinceLastDelinq == null) &&
                                 (l.loanAmount < 1.02*l.revolBal) &&
                                 (allowedStates.Contains(l.addrState.ToString()))
