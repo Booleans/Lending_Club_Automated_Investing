@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using LendingClubAPI.Classes;
 using Newtonsoft.Json;
 
@@ -13,50 +14,60 @@ namespace LendingClubAPI
     {
         private static void Main(string[] args)
         {
-            // Url for retrieving the latest listing of loans
-            var latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
+            
+                // Url for retrieving the latest listing of loans
+                var latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
 
-            // Url to retrieve the detailed list of notes owned
-            var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
+                // Url to retrieve the detailed list of notes owned
+                var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
 
-            // Url to retrieve account summary, which contains value of outstanding principal
-            var accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary";
+                // Url to retrieve account summary, which contains value of outstanding principal
+                var accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary";
 
-            // Url to submit a request to buy loans
-            var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
+                // Url to submit a request to buy loans
+                var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
 
-            // Store the Account object to get balance and outstanding principal.
-            Account myAccount = new Account();
-            myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl));
-            // Variable for storing cash balance available.
-            double accountBalance = myAccount.availableCash;
+                // Store the Account object to get balance and outstanding principal.
+                Account myAccount = new Account();
+                myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl));
+                // Variable for storing cash balance available.
+                double accountBalance = myAccount.availableCash;
 
-            // We only need to search for loans if we have at least $25 to buy one. 
-            if (accountBalance >= 25)
-            {
-                int numberOfLoansToBuy = (int) (accountBalance/25);
-                // Total outstanding principal of account. Used to get value each state should be limited to.
-                //double outstandingPrincipal = myAccount.outstandingPrincipal;
-                // Limit for a state is 3% of total outstanding principal.
-                //double statePrincipalLimit = .03*outstandingPrincipal;
+                // We only need to search for loans if we have at least $25 to buy one. 
+                if (accountBalance >= 25)
+                {
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    int numberOfLoansToBuy = (int) (accountBalance/25);
 
-                // List of notes I own. Used to determine which states I should invest in. 
-                //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
+                    while (stopwatch.ElapsedMilliseconds < 90000)
+                    {
+                     Thread.Sleep(500);
 
-                // Retrieve the latest offering of loans on the platform.
-                NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
+                        // Total outstanding principal of account. Used to get value each state should be limited to.
+                        //double outstandingPrincipal = myAccount.outstandingPrincipal;
+                        // Limit for a state is 3% of total outstanding principal.
+                        //double statePrincipalLimit = .03*outstandingPrincipal;
 
-                // Filter the new loans based off of my criteria. 
-                var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy);
+                        // List of notes I own. Used to determine which states I should invest in. 
+                        //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
 
-                // Create a new order to purchase the filtered loans. 
-                Order order = new Order();
-                order = BuildOrder(filteredLoans);
+                        // Retrieve the latest offering of loans on the platform.
+                        NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
 
-                string output = JsonConvert.SerializeObject(order);
-                Console.WriteLine(submitOrder(submitOrderUrl, output));
+                        // Filter the new loans based off of my criteria. 
+                        var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy);
+
+                        // Create a new order to purchase the filtered loans. 
+                        Order order = new Order();
+                        order = BuildOrder(filteredLoans);
+
+                        string output = JsonConvert.SerializeObject(order);
+                        Console.WriteLine(submitOrder(submitOrderUrl, output));
+                    }
+                    Console.ReadLine();
+                }
             }
-        }
 
         public static string RetrieveJsonString(string myURL)
         {
@@ -108,7 +119,7 @@ namespace LendingClubAPI
                 "MT","ND","NH","NM","NV",
                 "OK","OR","RI","SC","SD",
                 "TN","UT","VT","WI","WV",
-                "WY"
+                "WY","CA","TX","NY"
             };
 
             var filteredLoans = (from l in newLoans
@@ -117,6 +128,7 @@ namespace LendingClubAPI
                                 (l.inqLast6Mths == 0) &&
                                 (l.intRate >= 12.0) &&
                                 (l.intRate <= 18.0) &&
+                                (l.term == 36) &&
                                 (l.mthsSinceLastDelinq == null) &&
                                 (l.loanAmount < 1.02*l.revolBal) &&
                                 (allowedStates.Contains(l.addrState.ToString()))
@@ -158,8 +170,6 @@ namespace LendingClubAPI
             string json = jsonToSubmit;
 
             streamWriter.Write(json);
-            // Line maybe not needed.
-            // streamWriter.Flush();
         }
 
         var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
