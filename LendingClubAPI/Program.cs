@@ -123,14 +123,15 @@ namespace LendingClubAPI
             };
 
             var filteredLoans = (from l in newLoans
-                                 where l.annualInc >= 60000 &&
+                                 where //l.annualInc >= 60000 &&
                                 (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                (l.inqLast6Mths == 0) &&
+                                //(l.inqLast6Mths == 0) &&
                                 (l.intRate >= 12.0) &&
-                                (l.intRate <= 18.0) &&
+                                //(l.intRate <= 18.0) &&
                                 (l.term == 36) &&
-                                (l.mthsSinceLastDelinq == null) &&
-                                (l.loanAmount < 1.02*l.revolBal) &&
+                                //(l.mthsSinceLastDelinq == null) &&
+                                (l.loanAmount < 1.1*l.revolBal) &&
+                                (l.loanAmount > .9*l.revolBal) &&
                                 (allowedStates.Contains(l.addrState.ToString()))
                                  orderby l.intRate descending 
                                  select l).Take(numberOfLoansToInvestIn);
