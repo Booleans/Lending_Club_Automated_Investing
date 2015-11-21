@@ -32,6 +32,7 @@ namespace LendingClubAPI
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = new Account();
             myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl, authorizationToken));
+
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
 
@@ -39,6 +40,7 @@ namespace LendingClubAPI
             //if (accountBalance >= 25)
             if(accountBalance >= 0)
             {
+                // Use a stopwatch to terminate code after a certain duration.
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
@@ -60,8 +62,7 @@ namespace LendingClubAPI
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
                     // Need to programatically figure out allowed states.
-                    string[] allowedStates =
-                    {
+                    string[] allowedStates = {
                     "AK","AL","AR","AZ","CT",
                     "DC","DE","FL","HI","IA",
                     "ID","IN","KS","KY","LA",
@@ -69,11 +70,10 @@ namespace LendingClubAPI
                     "MT","ND","NH","NM","NV",
                     "OK","OR","RI","SC","SD",
                     "TN","UT","VT","WI","WV",
-                    "WY","CA","TX","NY"
-                                                };
+                    "WY","CA","TX","NY" };
 
-                // Filter the new loans based off of my criteria. 
-                var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates);
+                    // Filter the new loans based off of my criteria. 
+                    var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates);
 
                     // Create a new order to purchase the filtered loans. 
                     Order order = new Order();
@@ -82,6 +82,7 @@ namespace LendingClubAPI
                     string output = JsonConvert.SerializeObject(order);
                     Console.WriteLine(submitOrder(submitOrderUrl, output, authorizationToken));
                 }
+
                 Console.ReadLine();
             }
         }
@@ -141,8 +142,10 @@ namespace LendingClubAPI
                                 (l.loanAmount < 1.1*l.revolBal) &&
                                 (l.loanAmount > .9*l.revolBal) &&
                                 (allowedStates.Contains(l.addrState.ToString()))
-                                 orderby l.intRate descending 
-                                 select l).Take(numberOfLoansToInvestIn);
+                                 orderby l.intRate descending
+                                 select l).Take(2);
+                                // Comment out for testing.
+                                //select l).Take(numberOfLoansToInvestIn);
 
             return filteredLoans;
         }
@@ -169,24 +172,24 @@ namespace LendingClubAPI
         public static string submitOrder(string postURL, string jsonToSubmit, string AuthToken)
         {
             
-        var httpWebRequest = (HttpWebRequest)WebRequest.Create(postURL);
-        httpWebRequest.Headers.Add("Authorization:" + AuthToken);
-        httpWebRequest.ContentType = "application/json; charset=utf-8";
-        httpWebRequest.Method = "POST";            
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(postURL);
+            httpWebRequest.Headers.Add("Authorization:" + AuthToken);
+            httpWebRequest.ContentType = "application/json; charset=utf-8";
+            httpWebRequest.Method = "POST";            
 
-        using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-        {
-            string json = jsonToSubmit;
+            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                string json = jsonToSubmit;
 
-            streamWriter.Write(json);
-        }
+                streamWriter.Write(json);
+            }
 
-        var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-        using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-        {
-            var result = streamReader.ReadToEnd();
-            return result;
-        }
+            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                var result = streamReader.ReadToEnd();
+                return result;
+            }
         }
     }
 }

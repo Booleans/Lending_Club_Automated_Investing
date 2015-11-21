@@ -18,7 +18,7 @@ namespace LendingClubAPI
         public double installment { get; set; }
         public string grade { get; set; }
         public string subGrade { get; set; }
-        public int empLength { get; set; }
+        public int? empLength { get; set; }
         public string homeOwnership { get; set; }
         public double annualInc { get; set; }
         public string isIncV { get; set; }
