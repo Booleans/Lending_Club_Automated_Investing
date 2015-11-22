@@ -48,15 +48,13 @@ namespace LendingClubAPI
 
                 while (stopwatch.ElapsedMilliseconds < 90000)
                 {
-                    Thread.Sleep(500);
-
                     // Total outstanding principal of account. Used to get value each state should be limited to.
                     //double outstandingPrincipal = myAccount.outstandingPrincipal;
                     // Limit for a state is 3% of total outstanding principal.
                     //double statePrincipalLimit = .03*outstandingPrincipal;
 
                     // List of notes I own. Used to determine which states I should invest in. 
-                    //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
+                    NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
 
                     // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
@@ -78,7 +76,7 @@ namespace LendingClubAPI
                     // Create a new order to purchase the filtered loans. 
                     Order order = new Order();
                     order = BuildOrder(filteredLoans);
-
+                    
                     string output = JsonConvert.SerializeObject(order);
                     Console.WriteLine(submitOrder(submitOrderUrl, output, authorizationToken));
                 }
@@ -132,18 +130,18 @@ namespace LendingClubAPI
             
 
             var filteredLoans = (from l in newLoans
-                                 where //l.annualInc >= 60000 &&
-                                (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
+                                 where l.annualInc >= 60000 //&&
+                                //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
                                 //(l.inqLast6Mths == 0) &&
-                                (l.intRate >= 12.0) &&
+                                //(l.intRate >= 12.0) &&
                                 //(l.intRate <= 18.0) &&
-                                (l.term == 36) &&
+                                //(l.term == 36) &&
                                 //(l.mthsSinceLastDelinq == null) &&
-                                (l.loanAmount < 1.1*l.revolBal) &&
-                                (l.loanAmount > .9*l.revolBal) &&
-                                (allowedStates.Contains(l.addrState.ToString()))
+                                //(l.loanAmount < 1.1*l.revolBal) &&
+                                //(l.loanAmount > .9*l.revolBal) &&
+                                //(allowedStates.Contains(l.addrState.ToString()))
                                  orderby l.intRate descending
-                                 select l).Take(2);
+                                 select l).Take(3);
                                 // Comment out for testing.
                                 //select l).Take(numberOfLoansToInvestIn);
 
@@ -165,6 +163,7 @@ namespace LendingClubAPI
                 
                 loansToOrder.Add(buyLoan);
             }
+
             order.orders = loansToOrder;
             return order;
         }

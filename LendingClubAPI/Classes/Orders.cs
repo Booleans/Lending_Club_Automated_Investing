@@ -19,3 +19,7 @@ public class Order
     public List<LoanForOrder> orders { get; set; }
 }
 }
+
+public class OrderResponse {
+
+}
