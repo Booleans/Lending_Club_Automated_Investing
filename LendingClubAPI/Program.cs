@@ -18,6 +18,9 @@ namespace LendingClubAPI
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            // Read in text from CSV file to generate array of states we're allowed to invest in.
+            string allowedStatesFromCSV = File.ReadAllText(@"C:\Users\Nichollsas\Desktop\Lending_Club_API\Test.csv");
+
             // Read authorization token stored in text file.
             string authorizationToken = File.ReadAllText(@"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt");
 
@@ -40,14 +43,14 @@ namespace LendingClubAPI
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
 
+            // How much should be invested per loan? Must be an increment of $25. 
             double amountToInvest = 25.0;
 
             // We only need to search for loans if we have at least $25 to buy one. 
             //if (accountBalance >= 25)
             if(accountBalance >= 0)
             {
-  
-                int numberOfLoansToBuy = (int) (accountBalance/25);
+                int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
                 // Retrieve list of notes owned to create a list of loan ID values.
                 NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
@@ -205,6 +208,18 @@ namespace LendingClubAPI
                 var result = streamReader.ReadToEnd();
                 return result;
             }
+        }
+
+        public static string[] getAllowedStates(string CSVInputPath)
+        {
+            // Read in text from CSV file to generate array of states we're allowed to invest in.
+            string allowedStatesFromCSV = File.ReadAllText(CSVInputPath);
+
+            // Split the CSV text on \r\n
+            char[] delimiters = new char[] { '\r', '\n' };
+            string[] allowedStates= allowedStatesFromCSV.Split(delimiters,StringSplitOptions.RemoveEmptyEntries);
+
+            return allowedStates;
         }
     }
 }
