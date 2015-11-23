@@ -20,7 +20,7 @@ namespace LendingClubAPI
             // Url for retrieving the latest listing of loans
             var latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
 
-                // Url to retrieve the detailed list of notes owned
+            // Url to retrieve the detailed list of notes owned
             var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
 
             // Url to retrieve account summary, which contains value of outstanding principal
@@ -46,6 +46,12 @@ namespace LendingClubAPI
 
                 int numberOfLoansToBuy = (int) (accountBalance/25);
 
+                // Retrieve list of notes owned to create a list of loan ID values.
+                NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+
+                IEnumerable<int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
+                                                 select loan.loanId);
+
                 while (stopwatch.ElapsedMilliseconds < 90000)
                 {
                     // Total outstanding principal of account. Used to get value each state should be limited to.
@@ -54,8 +60,8 @@ namespace LendingClubAPI
                     //double statePrincipalLimit = .03*outstandingPrincipal;
 
                     // List of notes I own. Used to determine which states I should invest in. 
-                    NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
-
+                    //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+                    
                     // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
@@ -79,7 +85,13 @@ namespace LendingClubAPI
                     
                     string output = JsonConvert.SerializeObject(order);
                     var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(submitOrder(submitOrderUrl, output, authorizationToken));
+                    
+                    var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
+                    var loansPurchased = (from confirmation in orderConfirmations
+                                          where confirmation.investedAmount >= 0
+                                          select confirmation.loanId);
+                                       
                     Console.WriteLine(submitOrder(submitOrderUrl, output, authorizationToken));
                 }
 
