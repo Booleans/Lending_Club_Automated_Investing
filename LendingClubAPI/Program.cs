@@ -78,6 +78,8 @@ namespace LendingClubAPI
                     order = BuildOrder(filteredLoans);
                     
                     string output = JsonConvert.SerializeObject(order);
+                    var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(submitOrder(submitOrderUrl, output, authorizationToken));
+
                     Console.WriteLine(submitOrder(submitOrderUrl, output, authorizationToken));
                 }
 
