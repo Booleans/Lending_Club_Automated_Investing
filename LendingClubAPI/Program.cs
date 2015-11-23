@@ -14,6 +14,10 @@ namespace LendingClubAPI
     {
         private static void Main(string[] args)
         {
+            // Use a stopwatch to terminate code after a certain duration.
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             // Read authorization token stored in text file.
             string authorizationToken = File.ReadAllText(@"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt");
 
@@ -36,32 +40,23 @@ namespace LendingClubAPI
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
 
+            double amountToInvest = 25.0;
+
             // We only need to search for loans if we have at least $25 to buy one. 
             //if (accountBalance >= 25)
             if(accountBalance >= 0)
             {
-                // Use a stopwatch to terminate code after a certain duration.
-                var stopwatch = new Stopwatch();
-                stopwatch.Start();
-
+  
                 int numberOfLoansToBuy = (int) (accountBalance/25);
 
                 // Retrieve list of notes owned to create a list of loan ID values.
                 NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
 
-                IEnumerable<int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
-                                                 select loan.loanId);
+                List<int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
+                                          select loan.loanId).ToList();
 
-                while (stopwatch.ElapsedMilliseconds < 90000)
+                while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
                 {
-                    // Total outstanding principal of account. Used to get value each state should be limited to.
-                    //double outstandingPrincipal = myAccount.outstandingPrincipal;
-                    // Limit for a state is 3% of total outstanding principal.
-                    //double statePrincipalLimit = .03*outstandingPrincipal;
-
-                    // List of notes I own. Used to determine which states I should invest in. 
-                    //NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
-                    
                     // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
@@ -77,13 +72,14 @@ namespace LendingClubAPI
                     "WY","CA","TX","NY" };
 
                     // Filter the new loans based off of my criteria. 
-                    var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates);
+                    var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned);
 
                     // Create a new order to purchase the filtered loans. 
                     Order order = new Order();
-                    order = BuildOrder(filteredLoans);
+                    order = BuildOrder(filteredLoans, amountToInvest);
                     
                     string output = JsonConvert.SerializeObject(order);
+
                     var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(submitOrder(submitOrderUrl, output, authorizationToken));
                     
                     var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
@@ -91,8 +87,14 @@ namespace LendingClubAPI
                     var loansPurchased = (from confirmation in orderConfirmations
                                           where confirmation.investedAmount >= 0
                                           select confirmation.loanId);
-                                       
-                    Console.WriteLine(submitOrder(submitOrderUrl, output, authorizationToken));
+                    // Add purchased loans to the list of loan IDs owned. 
+                    foreach (int l in loansPurchased)
+                    {
+                        loanIDsOwned.Add(l);
+                    }
+
+                    // Subtract successfully invested loans from account balance.
+                    accountBalance -= loansPurchased.Count() * amountToInvest;
                 }
 
                 Console.ReadLine();
@@ -139,30 +141,30 @@ namespace LendingClubAPI
             return newLoans;
         }
 
-        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates)
-        {   // Array of states to invest in. Have to calculate this manually by downloading spreadsheet.
-            
+        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates, List<int> loanIDsOwned)
+        {
 
             var filteredLoans = (from l in newLoans
-                                 where l.annualInc >= 60000 //&&
+                                 where l.annualInc >= 60000 &&
                                 //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
                                 //(l.inqLast6Mths == 0) &&
                                 //(l.intRate >= 12.0) &&
                                 //(l.intRate <= 18.0) &&
-                                //(l.term == 36) &&
+                                (l.term == 36) &&
                                 //(l.mthsSinceLastDelinq == null) &&
                                 //(l.loanAmount < 1.1*l.revolBal) &&
                                 //(l.loanAmount > .9*l.revolBal) &&
-                                //(allowedStates.Contains(l.addrState.ToString()))
+                                (allowedStates.Contains(l.addrState.ToString())) &&
+                                (!loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending
                                  select l).Take(3);
                                 // Comment out for testing.
                                 //select l).Take(numberOfLoansToInvestIn);
-
+            
             return filteredLoans;
         }
 
-        public static Order BuildOrder(IEnumerable<Loan> loansToBuy)
+        public static Order BuildOrder(IEnumerable<Loan> loansToBuy, double amountToInvest)
         {
             Order order = new Order();
             order.aid = 1302864;
