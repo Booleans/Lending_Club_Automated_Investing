@@ -43,6 +43,9 @@ namespace LendingClubAPI
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
 
+            // What is the outstanding principal of the account?
+            double outstandingPrincipal = myAccount.outstandingPrincipal;
+
             // How much should be invested per loan? Must be an increment of $25. 
             double amountToInvest = 25.0;
 
