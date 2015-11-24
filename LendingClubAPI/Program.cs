@@ -14,27 +14,48 @@ namespace LendingClubAPI
     {
         private static void Main(string[] args)
         {
-            // Use a stopwatch to terminate code after a certain duration.
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            //********************************************************************************************************************************//
+            //********************************************************************************************************************************//
+            bool AtHome = true;
+            
+            // Account number that you want the code to run on.
+            string accountNumber = "1302864";
 
-            // Read in text from CSV file to generate array of states we're allowed to invest in.
-            string allowedStatesFromCSV = File.ReadAllText(@"C:\Users\Nichollsas\Desktop\Lending_Club_API\Test.csv");
+            // Location of the file that stores the account's authorization token.
+            string authorizationTokenFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt";
 
-            // Read authorization token stored in text file.
-            string authorizationToken = File.ReadAllText(@"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt");
+            // Location of the file used to determine which states can be invested in.
+            string allowedStatesCSVFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API";
+
+            // How much should be invested per loan? Must be an increment of $25. 
+            double amountToInvest = 25.0;
+
+            // Loan grades that you are willing to invest in.
+            var loanGradesAllowed = new string[] { "B", "C", "D" };
 
             // Url for retrieving the latest listing of loans
             var latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
 
             // Url to retrieve the detailed list of notes owned
-            var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
+            var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
 
             // Url to retrieve account summary, which contains value of outstanding principal
-            var accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary";
+            var accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/summary";
 
             // Url to submit a request to buy loans
-            var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
+            var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
+            //********************************************************************************************************************************//
+            //********************************************************************************************************************************//
+            
+            // Use a stopwatch to terminate code after a certain duration.
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            // Read in text from CSV file to generate array of states we're allowed to invest in.
+            //string allowedStatesFromCSV = File.ReadAllText(@"C:\Users\Nichollsas\Desktop\Lending_Club_API\Test.csv");
+
+            // Read authorization token stored in text file.
+            string authorizationToken = File.ReadAllText(authorizationTokenFilePath);
 
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = new Account();
@@ -43,11 +64,8 @@ namespace LendingClubAPI
             // Variable for storing cash balance available.
             double accountBalance = myAccount.availableCash;
 
-            // How much should be invested per loan? Must be an increment of $25. 
-            double amountToInvest = 25.0;
-
             // We only need to search for loans if we have at least $25 to buy one. 
-            //if (accountBalance >= 25)
+            // if (accountBalance >= amountToInvest)
             if(accountBalance >= 0)
             {
                 int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
@@ -71,11 +89,11 @@ namespace LendingClubAPI
                     "MD","ME","MN","MO","MS",
                     "MT","ND","NH","NM","NV",
                     "OK","OR","RI","SC","SD",
-                    "TN","UT","VT","WI","WV",
+                    "TN","UT","VT","WI ","WV",
                     "WY","CA","TX","NY" };
 
                     // Filter the new loans based off of my criteria. 
-                    var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned);
+                    var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
 
                     // Create a new order to purchase the filtered loans. 
                     Order order = new Order();
@@ -144,7 +162,7 @@ namespace LendingClubAPI
             return newLoans;
         }
 
-        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates, List<int> loanIDsOwned)
+        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates, List<int> loanIDsOwned, string[] gradesAllowed)
         {
 
             var filteredLoans = (from l in newLoans
@@ -154,6 +172,7 @@ namespace LendingClubAPI
                                 //(l.intRate >= 12.0) &&
                                 //(l.intRate <= 18.0) &&
                                 (l.term == 36) &&
+                                gradesAllowed.Contains(l.grade) &&                                 
                                 //(l.mthsSinceLastDelinq == null) &&
                                 //(l.loanAmount < 1.1*l.revolBal) &&
                                 //(l.loanAmount > .9*l.revolBal) &&
