@@ -13,6 +13,15 @@ namespace LendingClubAPI
     internal class Program
     {
         static string accountNumber;
+        static string projectDirectory;
+        static string authorizationTokenFilePath;
+        static string allowedStatesCSVFilePath;
+        static double amountToInvest;
+        static string[] loanGradesAllowed;
+        static string latestLoansUrl;
+        static string detailedNotesOwnedUrl;
+        static string accountSummaryUrl;
+        static string submitOrderUrl;
 
         private static void Main(string[] args)
         {
@@ -20,34 +29,34 @@ namespace LendingClubAPI
             //********************************************************************************************************************************//
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
-            var projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString());
+            projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
             // Location of the file that stores the account's authorization token.
-            string authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
+            authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
             
             // Location of the file used to determine which states can be invested in.
-            string allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
+            allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
 
             // Account number that you want the code to run on.
             accountNumber = "1302864";            
 
             // How much should be invested per loan? Must be an increment of $25. 
-            double amountToInvest = 25.0;
+            amountToInvest = 25.0;
 
             // Loan grades that you are willing to invest in.
-            var loanGradesAllowed = new string[] { "B", "C", "D" };
+            loanGradesAllowed = new string[] { "B", "C", "D" };
 
             // Url for retrieving the latest listing of loans
-            var latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
+            latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
 
             // Url to retrieve the detailed list of notes owned
-            var detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
+            detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
 
             // Url to retrieve account summary, which contains value of outstanding principal
-            var accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/summary";
+            accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/summary";
 
             // Url to submit a request to buy loans
-            var submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
+            submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
             
