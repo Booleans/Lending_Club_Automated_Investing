@@ -16,16 +16,30 @@ namespace LendingClubAPI
         {
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
-            bool AtHome = true;
-            
-            // Account number that you want the code to run on.
-            string accountNumber = "1302864";
+            // Are you working at home? 
+            bool AtHome = false;
 
             // Location of the file that stores the account's authorization token.
-            string authorizationTokenFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt";
-
+            string authorizationTokenFilePath = null;
+            
             // Location of the file used to determine which states can be invested in.
-            string allowedStatesCSVFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API";
+            string allowedStatesCSVFilePath = null;
+
+            // Change the file path depending on if I am at home or work. 
+            // Later we can make it relative to project folder instead of hard-coded. 
+            if (AtHome)
+            {
+                authorizationTokenFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt";
+                allowedStatesCSVFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API";
+            }
+            else
+            {
+                authorizationTokenFilePath = @"C:\Users\nichollsas\Desktop\Lending_Club_API\AndrewAuthorizationToken.txt";
+                allowedStatesCSVFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API";
+            }
+
+            // Account number that you want the code to run on.
+            string accountNumber = "1302864";            
 
             // How much should be invested per loan? Must be an increment of $25. 
             double amountToInvest = 25.0;
