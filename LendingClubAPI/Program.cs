@@ -12,6 +12,8 @@ namespace LendingClubAPI
 {
     internal class Program
     {
+        static string accountNumber;
+
         private static void Main(string[] args)
         {
             //********************************************************************************************************************************//
@@ -27,7 +29,7 @@ namespace LendingClubAPI
             string allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
 
             // Account number that you want the code to run on.
-            string accountNumber = "1302864";            
+            accountNumber = "1302864";            
 
             // How much should be invested per loan? Must be an increment of $25. 
             double amountToInvest = 25.0;
@@ -192,7 +194,7 @@ namespace LendingClubAPI
         public static Order BuildOrder(IEnumerable<Loan> loansToBuy, double amountToInvest)
         {
             Order order = new Order();
-            order.aid = 1302864;
+            order.aid = (Int32.Parse(accountNumber));
             List<LoanForOrder> loansToOrder = new List<LoanForOrder>();
 
             foreach (Loan loan in loansToBuy)
