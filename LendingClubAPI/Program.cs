@@ -16,8 +16,6 @@ namespace LendingClubAPI
         {
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
-            // Are you working at home? 
-            bool AtHome = false;
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             var projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString());
@@ -77,6 +75,7 @@ namespace LendingClubAPI
                 // Retrieve list of notes owned to create a list of loan ID values.
                 NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
 
+                // Create a list that contains the loan IDs of all notes owned.
                 List<int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
                                           select loan.loanId).ToList();
 
