@@ -19,24 +19,14 @@ namespace LendingClubAPI
             // Are you working at home? 
             bool AtHome = false;
 
+            // Find the directory of the project so we can use a relative path to the authorization token file. 
+            var projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString());
+
             // Location of the file that stores the account's authorization token.
-            string authorizationTokenFilePath = null;
+            string authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
             
             // Location of the file used to determine which states can be invested in.
-            string allowedStatesCSVFilePath = null;
-
-            // Change the file path depending on if I am at home or work. 
-            // Later we can make it relative to project folder instead of hard-coded. 
-            if (AtHome)
-            {
-                authorizationTokenFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API\AndrewAuthorizationToken.txt";
-                allowedStatesCSVFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API";
-            }
-            else
-            {
-                authorizationTokenFilePath = @"C:\Users\nichollsas\Desktop\Lending_Club_API\AndrewAuthorizationToken.txt";
-                allowedStatesCSVFilePath = @"C:\Users\andre_000\Documents\GitHub\Lending_Club_API";
-            }
+            string allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
 
             // Account number that you want the code to run on.
             string accountNumber = "1302864";            
