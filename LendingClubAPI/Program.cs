@@ -324,5 +324,18 @@ namespace LendingClubAPI
             // Set the allowedStates variable to the result of the query.
             allowedStates = sortedStates.ToArray();
         }
+
+        public static void downloadNotesOwnedCSV()
+        {
+
+            https://www.lendingclub.com/account/notesRawDataExtended.action
+
+            WebClient webClient = new WebClient();
+            webClient.UseDefaultCredentials = false;
+            webClient.Credentials = new NetworkCredential("andrewsnicholls@gmail.com", "testPassword");
+
+            webClient.DownloadFile("https://www.lendingclub.com/account/notesRawDataExtended.action", @"C:\notes.csv");
+
+        }
     }
 }
