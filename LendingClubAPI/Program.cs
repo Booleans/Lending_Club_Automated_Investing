@@ -22,6 +22,11 @@ namespace LendingClubAPI
         static string detailedNotesOwnedUrl;
         static string accountSummaryUrl;
         static string submitOrderUrl;
+        static NotesOwned myNotesOwned;
+        static string authorizationToken;
+        static double accountBalance;
+
+
 
         private static void Main(string[] args)
         {
@@ -68,14 +73,14 @@ namespace LendingClubAPI
             //string allowedStatesFromCSV = File.ReadAllText(@"C:\Users\Nichollsas\Desktop\Lending_Club_API\Test.csv");
 
             // Read authorization token stored in text file.
-            string authorizationToken = File.ReadAllText(authorizationTokenFilePath);
+            authorizationToken = File.ReadAllText(authorizationTokenFilePath);
 
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = new Account();
             myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl, authorizationToken));
 
             // Variable for storing cash balance available.
-            double accountBalance = myAccount.availableCash;
+            accountBalance = myAccount.availableCash;
 
             // We only need to search for loans if we have at least $25 to buy one. 
             // if (accountBalance >= amountToInvest)
@@ -84,12 +89,11 @@ namespace LendingClubAPI
                 int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
                 // Retrieve list of notes owned to create a list of loan ID values.
-                NotesOwned myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+                myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
 
-                // Create a list that contains the loan IDs of all notes owned.
-                List<int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
-                                          select loan.loanId).ToList();
-
+                List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
+                                             select loan.loanId).ToList();
+                         
                 while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
                 {
                     // Retrieve the latest offering of loans on the platform.
@@ -122,6 +126,7 @@ namespace LendingClubAPI
                     var loansPurchased = (from confirmation in orderConfirmations
                                           where confirmation.investedAmount >= 0
                                           select confirmation.loanId);
+
                     // Add purchased loans to the list of loan IDs owned. 
                     foreach (int l in loansPurchased)
                     {
