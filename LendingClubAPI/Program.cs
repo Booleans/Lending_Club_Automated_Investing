@@ -262,18 +262,6 @@ namespace LendingClubAPI
             }
         }
 
-        public static string[] getAllowedStates(string CSVInputPath)
-        {
-            // Read in text from CSV file to generate array of states we're allowed to invest in.
-            string allowedStatesFromCSV = File.ReadAllText(CSVInputPath);
-
-            // Split the CSV text on \r\n
-            char[] delimiters = new char[] { '\r', '\n' };
-            string[] allowedStates= allowedStatesFromCSV.Split(delimiters,StringSplitOptions.RemoveEmptyEntries);
-
-            return allowedStates;
-        }
-
         public static void calculateAndSetAllowedStatesFromCSV(string CSVInputpath)
         {
             string allowedStatesFromCSV = File.ReadAllText(CSVInputpath);
