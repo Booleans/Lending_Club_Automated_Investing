@@ -102,7 +102,7 @@ namespace LendingClubAPI
             totalAccountValue = myAccount.accountTotal;
 
             // Variable for storing cash balance available.
-            accountBalance = myAccount.accountTotal;
+            accountBalance = myAccount.availableCash;
 
             // We only need to search for loans if we have at least $25 to buy one. 
             // if (accountBalance >= amountToInvest)
