@@ -121,9 +121,6 @@ namespace LendingClubAPI
                     // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
-                    // Need to programatically figure out allowed states.
-                    allowedStates = stateAbbreviations;
-
                     // Filter the new loans based off of my criteria. 
                     var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
 
