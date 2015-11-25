@@ -25,8 +25,10 @@ namespace LendingClubAPI
         static NotesOwned myNotesOwned;
         static string authorizationToken;
         static double accountBalance;
-
-
+        static string notesFromCSVFilePath;
+        public static string[] stateAbbreviations;
+        public static string[] allowedStates;
+        public static double totalAccountValue;
 
         private static void Main(string[] args)
         {
@@ -41,6 +43,10 @@ namespace LendingClubAPI
             
             // Location of the file used to determine which states can be invested in.
             allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
+
+            // File path of the CSV file downloaded from Lending Club.
+            // This data will be used to create the list of allowed states.
+            notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
 
             // Account number that you want the code to run on.
             accountNumber = "1302864";            
@@ -64,13 +70,26 @@ namespace LendingClubAPI
             submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
-            
+
+            // We need an array of possible state abbreviations.
+            stateAbbreviations = new string[] {
+                                 "AK","AL","AR","AZ","CA",
+                                 "CO","CT","DE","FL","GA",
+                                 "HI","IA","ID","IL","IN",
+                                 "KS","KY","LA","MA","MD",
+                                 "ME","MI","MN","MO","MS",
+                                 "MT","NC","ND","NE","NH",
+                                 "NJ","NM","NV","NY","OH",
+                                 "OK","OR","PA","RI","SC",
+                                 "SD","TN","TX","UT","VA",
+                                 "VT","WA","WI","WV","WY"};
+
+            // Call calculateAndSetAllowedStatesFromCSV function to set the allowed states.
+            calculateAndSetAllowedStatesFromCSV(notesFromCSVFilePath);
+
             // Use a stopwatch to terminate code after a certain duration.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-
-            // Read in text from CSV file to generate array of states we're allowed to invest in.
-            //string allowedStatesFromCSV = File.ReadAllText(@"C:\Users\Nichollsas\Desktop\Lending_Club_API\Test.csv");
 
             // Read authorization token stored in text file.
             authorizationToken = File.ReadAllText(authorizationTokenFilePath);
@@ -79,8 +98,11 @@ namespace LendingClubAPI
             Account myAccount = new Account();
             myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl, authorizationToken));
 
+            // Get the total value of the account. 
+            totalAccountValue = myAccount.accountTotal;
+
             // Variable for storing cash balance available.
-            accountBalance = myAccount.availableCash;
+            accountBalance = myAccount.accountTotal;
 
             // We only need to search for loans if we have at least $25 to buy one. 
             // if (accountBalance >= amountToInvest)
@@ -100,15 +122,7 @@ namespace LendingClubAPI
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
                     // Need to programatically figure out allowed states.
-                    string[] allowedStates = {
-                    "AK","AL","AR","AZ","CT",
-                    "DC","DE","FL","HI","IA",
-                    "ID","IN","KS","KY","LA",
-                    "MD","ME","MN","MO","MS",
-                    "MT","ND","NH","NM","NV",
-                    "OK","OR","RI","SC","SD",
-                    "TN","UT","VT","WI ","WV",
-                    "WY","CA","TX","NY" };
+                    allowedStates = stateAbbreviations;
 
                     // Filter the new loans based off of my criteria. 
                     var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
@@ -258,6 +272,72 @@ namespace LendingClubAPI
             string[] allowedStates= allowedStatesFromCSV.Split(delimiters,StringSplitOptions.RemoveEmptyEntries);
 
             return allowedStates;
+        }
+
+        public static void calculateAndSetAllowedStatesFromCSV(string CSVInputpath)
+        {
+            string allowedStatesFromCSV = File.ReadAllText(CSVInputpath);
+            char[] delimiters = new char[] { '\r', '\n' };
+            string[] allowedStates = allowedStatesFromCSV.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+            Dictionary<string, double> states = new Dictionary<string, double>();
+
+            foreach (string note in allowedStates.Skip(1))
+            {
+                string stateOfNote = null;
+                double principalRemainingOfNote = 0;
+
+                // Need a boolean to filter out notes that aren't current. 
+                bool isNoteCurrent = false;
+
+                var noteDetails = note.Split(',');
+
+                // We need to make sure we are only using loans that are current. 
+                foreach (var detail in noteDetails)
+                {
+                    // This needs to be changed to "Current" when done testing.
+                    if (detail == "Fully Paid") {
+                        isNoteCurrent = true;
+                        break;
+                    }
+                }
+
+                // If the note is current we want to find out the index po
+                if (isNoteCurrent) {
+                    for (int i = 0; i < noteDetails.Length; i++) {
+                        if (stateAbbreviations.Contains(noteDetails[i])) {
+                            stateOfNote = noteDetails[i];
+                        }                        
+                    }
+
+                    principalRemainingOfNote = Double.Parse(noteDetails[10]);
+
+                    // If the state has already been added to the dictionary...
+                    if (states.ContainsKey(stateOfNote))
+                    {
+                        // Increase the principal value in that state.
+                        states[stateOfNote] += Math.Round(principalRemainingOfNote, 2);
+                    }
+                    else
+                    {
+                        // Add state and its principal value for this note.
+                        states.Add(stateOfNote, Math.Round(principalRemainingOfNote));
+                    }                 
+                }
+            }
+
+            // Get the total outstanding principal out of all states.
+            // double outstandingPrincipal = states.Sum(x => x.Value);
+
+            // Sort the states in alphabetical order.
+            // Change <= .03 to < .03 when testing has concluded.
+            var sortedStates = from k in states
+                                where (k.Value <= .03 * totalAccountValue)
+                                orderby k.Key
+                                select k.Key;
+
+            // Set the allowedStates variable to the result of the query.
+            allowedStates = sortedStates.ToArray();
         }
     }
 }
