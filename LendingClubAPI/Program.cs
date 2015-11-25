@@ -85,7 +85,7 @@ namespace LendingClubAPI
                                  "VT","WA","WI","WV","WY"};
 
             // Call calculateAndSetAllowedStatesFromCSV function to set the allowed states.
-            calculateAndSetAllowedStatesFromCSV(notesFromCSVFilePath);
+            allowedStates = calculateAndSetAllowedStatesFromCSV(notesFromCSVFilePath);
 
             // Use a stopwatch to terminate code after a certain duration.
             var stopwatch = new Stopwatch();
@@ -196,18 +196,18 @@ namespace LendingClubAPI
         {
 
             var filteredLoans = (from l in newLoans
-                                 where l.annualInc >= 60000 &&
-                                //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                //(l.inqLast6Mths == 0) &&
-                                //(l.intRate >= 12.0) &&
-                                //(l.intRate <= 18.0) &&
-                                (l.term == 36) &&
-                                gradesAllowed.Contains(l.grade) &&                                 
-                                //(l.mthsSinceLastDelinq == null) &&
-                                //(l.loanAmount < 1.1*l.revolBal) &&
-                                //(l.loanAmount > .9*l.revolBal) &&
-                                (allowedStates.Contains(l.addrState.ToString())) &&
-                                (!loanIDsOwned.Contains(l.id))
+                                 where l.annualInc >= 00 &&
+                                 //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
+                                 //(l.inqLast6Mths == 0) &&
+                                 //(l.intRate >= 12.0) &&
+                                 //(l.intRate <= 18.0) &&
+                                 //(l.term == 36) &&
+                                 //gradesAllowed.Contains(l.grade) &&
+                                 //(l.mthsSinceLastDelinq == null) &&
+                                 //(l.loanAmount < 1.1*l.revolBal) &&
+                                 //(l.loanAmount > .9*l.revolBal) &&
+                                 (allowedStates.Contains(l.addrState.ToString())) &&
+                                 (!loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending
                                  select l).Take(3);
                                 // Comment out for testing.
@@ -259,13 +259,20 @@ namespace LendingClubAPI
             }
         }
 
-        public static void calculateAndSetAllowedStatesFromCSV(string CSVInputpath)
+        public static string[] calculateAndSetAllowedStatesFromCSV(string CSVInputpath)
         {
             string allowedStatesFromCSV = File.ReadAllText(CSVInputpath);
             char[] delimiters = new char[] { '\r', '\n' };
             string[] allowedStates = allowedStatesFromCSV.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
             Dictionary<string, double> states = new Dictionary<string, double>();
+
+            // Population the dictionary with all states.
+            foreach (string state in stateAbbreviations)
+            {
+                // Add the state abbreviationg and set the principal balance to 0.
+                states.Add(state, 0.0);
+            }
 
             foreach (string note in allowedStates.Skip(1))
             {
@@ -297,17 +304,9 @@ namespace LendingClubAPI
 
                     principalRemainingOfNote = Double.Parse(noteDetails[10]);
 
-                    // If the state has already been added to the dictionary...
-                    if (states.ContainsKey(stateOfNote))
-                    {
-                        // Increase the principal value in that state.
-                        states[stateOfNote] += Math.Round(principalRemainingOfNote, 2);
-                    }
-                    else
-                    {
-                        // Add state and its principal value for this note.
-                        states.Add(stateOfNote, Math.Round(principalRemainingOfNote));
-                    }                 
+                    // Increase the principal value in that state.
+                    states[stateOfNote] += Math.Round(principalRemainingOfNote, 2);
+     
                 }
             }
 
@@ -323,6 +322,8 @@ namespace LendingClubAPI
 
             // Set the allowedStates variable to the result of the query.
             allowedStates = sortedStates.ToArray();
+
+            return allowedStates;
         }
 
         public static void downloadNotesOwnedCSV()
