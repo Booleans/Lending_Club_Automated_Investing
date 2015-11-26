@@ -34,6 +34,7 @@ namespace LendingClubAPI
         {
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
+            
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
@@ -58,7 +59,7 @@ namespace LendingClubAPI
             loanGradesAllowed = new string[] { "B", "C", "D" };
 
             // Url for retrieving the latest listing of loans
-            latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing";
+            latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
 
             // Url to retrieve the detailed list of notes owned
             detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
@@ -159,7 +160,7 @@ namespace LendingClubAPI
             // Read authorization token from file.
             wrGETURL.Headers.Add("Authorization:" + AuthToken);
             wrGETURL.ContentType = "applicaton/json; charset=utf-8";
-
+      
             Stream objStream;
             objStream = wrGETURL.GetResponse().GetResponseStream();
             //Variable for storing total portfolio value limit
@@ -197,21 +198,19 @@ namespace LendingClubAPI
 
             var filteredLoans = (from l in newLoans
                                  where l.annualInc >= 00 &&
-                                 //(l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                 //(l.inqLast6Mths == 0) &&
-                                 //(l.intRate >= 12.0) &&
+                                 (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
+                                 (l.inqLast6Mths == 0) &&
+                                 (l.intRate >= 12.0) &&
                                  //(l.intRate <= 18.0) &&
-                                 //(l.term == 36) &&
-                                 //gradesAllowed.Contains(l.grade) &&
-                                 //(l.mthsSinceLastDelinq == null) &&
-                                 //(l.loanAmount < 1.1*l.revolBal) &&
-                                 //(l.loanAmount > .9*l.revolBal) &&
+                                 (l.term == 36) &&
+                                 gradesAllowed.Contains(l.grade) &&
+                                 (l.mthsSinceLastDelinq == null) &&
+                                 (l.loanAmount < 1.1*l.revolBal) &&
+                                 (l.loanAmount > .9*l.revolBal) &&
                                  (allowedStates.Contains(l.addrState.ToString())) &&
                                  (!loanIDsOwned.Contains(l.id))
-                                 orderby l.intRate descending
-                                 select l).Take(3);
-                                // Comment out for testing.
-                                //select l).Take(numberOfLoansToInvestIn);
+                                 orderby l.intRate descending                                                            
+                                 select l).Take(numberOfLoansToInvestIn);
             
             return filteredLoans;
         }
@@ -335,7 +334,7 @@ namespace LendingClubAPI
             webClient.UseDefaultCredentials = false;
             webClient.Credentials = new NetworkCredential("andrewsnicholls@gmail.com", "testPassword");
 
-            webClient.DownloadFile("https://www.lendingclub.com/account/notesRawDataExtended.action", @"C:\notes.csv");
+            webClient.DownloadFile("https://www.lendingclub.com/account/notesRawDataExtended.csv", @"C:\notes.csv");
 
         }
     }
