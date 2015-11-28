@@ -140,28 +140,32 @@ namespace LendingClubAPI
                     // Filter the new loans based off of my criteria. 
                     var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
 
-                    // Create a new order to purchase the filtered loans. 
-                    Order order = new Order();
-                    order = BuildOrder(filteredLoans, amountToInvest);
-                    
-                    string output = JsonConvert.SerializeObject(order);
-
-                    var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(submitOrder(submitOrderUrl, output, authorizationToken));
-                    
-                    var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
-
-                    var loansPurchased = (from confirmation in orderConfirmations
-                                          where confirmation.investedAmount >= 0
-                                          select confirmation.loanId);
-
-                    // Add purchased loans to the list of loan IDs owned. 
-                    foreach (int l in loansPurchased)
+                    // We only need to build an order if filteredLoan is not null.
+                    if (filteredLoans != null)
                     {
-                        loanIDsOwned.Add(l);
-                    }
+                        // Create a new order to purchase the filtered loans. 
+                        Order order = new Order();
+                        order = BuildOrder(filteredLoans, amountToInvest);
 
-                    // Subtract successfully invested loans from account balance.
-                    accountBalance -= loansPurchased.Count() * amountToInvest;
+                        string output = JsonConvert.SerializeObject(order);
+
+                        var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(submitOrder(submitOrderUrl, output, authorizationToken));
+
+                        var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
+
+                        var loansPurchased = (from confirmation in orderConfirmations
+                                              where confirmation.investedAmount >= 0
+                                              select confirmation.loanId);
+
+                        // Add purchased loans to the list of loan IDs owned. 
+                        foreach (int l in loansPurchased)
+                        {
+                            loanIDsOwned.Add(l);
+                        }
+
+                        // Subtract successfully invested loans from account balance.
+                        accountBalance -= loansPurchased.Count() * amountToInvest;
+                    }
                 }
 
                 Console.ReadLine();
