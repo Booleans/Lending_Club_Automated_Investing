@@ -29,12 +29,15 @@ namespace LendingClubAPI
         public static string[] stateAbbreviations;
         public static string[] allowedStates;
         public static double totalAccountValue;
+        public static bool getAllLoans;
 
         private static void Main(string[] args)
         {
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
-            
+
+            // Boolean to change the get listed loans URL. After we've retrieved all loans, only retrieve new. 
+            getAllLoans = true;
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
@@ -119,6 +122,18 @@ namespace LendingClubAPI
                          
                 while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
                 {
+                    // If this is the first time retrieving listed loans, retrieve all.
+                    // Retrieve only new loans for subsequent loops. 
+                    if (getAllLoans == true)
+                    {
+                        latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
+                        getAllLoans = false;
+                    }
+                    else
+                    {
+                        latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=false";
+                    }
+
                     // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
