@@ -141,8 +141,9 @@ namespace LendingClubAPI
                     var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
 
                     // We only need to build an order if filteredLoan is not null.
-                    if (filteredLoans != null)
+                    if (filteredLoans.Count() > 0)
                     {
+
                         // Create a new order to purchase the filtered loans. 
                         Order order = new Order();
                         order = BuildOrder(filteredLoans, amountToInvest);
@@ -219,7 +220,7 @@ namespace LendingClubAPI
                                  where l.annualInc >= 00 &&
                                  (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
                                  (l.inqLast6Mths == 0) &&
-                                 (l.intRate >= 12.0) &&
+                                 (l.intRate >= 10.0) &&
                                  //(l.intRate <= 18.0) &&
                                  (l.term == 36) &&
                                  gradesAllowed.Contains(l.grade) &&

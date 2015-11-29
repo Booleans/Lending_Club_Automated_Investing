@@ -58,7 +58,7 @@ namespace LendingClubAPI
         public int pubRec { get; set; }
         public int totalBalExMort { get; set; }
         public double revolBal { get; set; }
-        public double revolUtil { get; set; }
+        public double? revolUtil { get; set; }
         public int totalBcLimit { get; set; }
         public int totalAcc { get; set; }
         public int totalIlHighCreditLimit { get; set; }
