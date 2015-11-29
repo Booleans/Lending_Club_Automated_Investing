@@ -30,6 +30,7 @@ namespace LendingClubAPI
         public static string[] allowedStates;
         public static double totalAccountValue;
         public static bool getAllLoans;
+        public static double statePercentLimit;
 
         private static void Main(string[] args)
         {
@@ -38,6 +39,9 @@ namespace LendingClubAPI
 
             // Boolean to change the get listed loans URL. After we've retrieved all loans, only retrieve new. 
             getAllLoans = true;
+
+            // Limit outstanding principal in each state to no more than this % of the portfolio value.
+            statePercentLimit = .05;
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
@@ -329,13 +333,10 @@ namespace LendingClubAPI
                 }
             }
 
-            // Get the total outstanding principal out of all states.
-            // double outstandingPrincipal = states.Sum(x => x.Value);
-
             // Sort the states in alphabetical order.
             // Change <= .03 to < .03 when testing has concluded.
             var sortedStates = from k in states
-                                where (k.Value <= .03 * totalAccountValue)
+                                where (k.Value <= statePercentLimit * totalAccountValue)
                                 orderby k.Key
                                 select k.Key;
 
