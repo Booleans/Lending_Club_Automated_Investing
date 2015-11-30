@@ -47,8 +47,9 @@ namespace LendingClubAPI
             projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
             // Location of the file that stores the account's authorization token.
-            authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
-            
+            // authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
+            authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
+
             // Location of the file used to determine which states can be invested in.
             allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
 
