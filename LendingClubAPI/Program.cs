@@ -113,9 +113,8 @@ namespace LendingClubAPI
             // Variable for storing cash balance available.
             accountBalance = myAccount.availableCash;
 
-            // We only need to search for loans if we have at least $25 to buy one. 
-            // if (accountBalance >= amountToInvest)
-            if(accountBalance >= 0)
+            // We only need to search for loans if the available balance >= minimum investment amount. 
+            if (accountBalance >= amountToInvest)
             {
                 int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
@@ -312,8 +311,8 @@ namespace LendingClubAPI
                 // We need to make sure we are only using loans that are current. 
                 foreach (var detail in noteDetails)
                 {
-                    // This needs to be changed to "Current" when done testing.
-                    if (detail == "Fully Paid") {
+                    // Test if the note is current. 
+                    if (detail == "Current") {
                         isNoteCurrent = true;
                         break;
                     }
@@ -336,7 +335,6 @@ namespace LendingClubAPI
             }
 
             // Sort the states in alphabetical order.
-            // Change <= .03 to < .03 when testing has concluded.
             var sortedStates = from k in states
                                 where (k.Value <= statePercentLimit * totalAccountValue)
                                 orderby k.Key
