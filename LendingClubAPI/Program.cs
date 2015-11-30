@@ -221,16 +221,16 @@ namespace LendingClubAPI
         {
 
             var filteredLoans = (from l in newLoans
-                                 where l.annualInc >= 00 &&
+                                 where l.annualInc >= 59900 &&
                                  (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
                                  (l.inqLast6Mths == 0) &&
                                  (l.intRate >= 10.0) &&
                                  //(l.intRate <= 18.0) &&
                                  (l.term == 36) &&
-                                 gradesAllowed.Contains(l.grade) &&
+                                 (gradesAllowed.Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
-                                 (l.loanAmount < 1.1*l.revolBal) &&
-                                 (l.loanAmount > .9*l.revolBal) &&
+                                 (l.loanAmount <= 1.1*l.revolBal) &&
+                                 (l.loanAmount >= .9*l.revolBal) &&
                                  (allowedStates.Contains(l.addrState.ToString())) &&
                                  (!loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending                                                            
@@ -297,6 +297,7 @@ namespace LendingClubAPI
                 states.Add(state, 0.0);
             }
 
+            // Skip the first line because it contains the row headings. 
             foreach (string note in allowedStates.Skip(1))
             {
                 string stateOfNote = null;
