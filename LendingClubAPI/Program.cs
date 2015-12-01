@@ -249,7 +249,7 @@ namespace LendingClubAPI
             {
                 LoanForOrder buyLoan = new LoanForOrder();
                 buyLoan.loanId = loan.id;
-                buyLoan.requestedAmount = 25.0;
+                buyLoan.requestedAmount = amountToInvest;
                 buyLoan.portfolioId = null;
                 
                 loansToOrder.Add(buyLoan);
