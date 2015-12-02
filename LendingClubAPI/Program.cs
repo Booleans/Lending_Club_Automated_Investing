@@ -300,35 +300,24 @@ namespace LendingClubAPI
                 string stateOfNote = null;
                 double principalRemainingOfNote = 0;
 
-                // Need a boolean to filter out notes that aren't current. 
-                bool isNoteCurrent = false;
-
                 var noteDetails = note.Split(',');
 
                 // We need to make sure we are only using loans that are current. 
-                foreach (var detail in noteDetails)
-                {
-                    // Test if the note is current. 
-                    if (detail == "Current") {
-                        isNoteCurrent = true;
-                        break;
-                    }
+                bool isNoteCurrent = noteDetails.Any(detail => detail == "Current");
+
+                // If the note is not current then skip to the next iteration of the foreach loop. 
+                if (!isNoteCurrent) continue;
+
+                for (int i = 0; i < noteDetails.Length; i++) {
+                    if (stateAbbreviations.Contains(noteDetails[i])) {
+                        stateOfNote = noteDetails[i];
+                    }                        
                 }
 
-                // If the note is current we want to find out the index po
-                if (isNoteCurrent) {
-                    for (int i = 0; i < noteDetails.Length; i++) {
-                        if (stateAbbreviations.Contains(noteDetails[i])) {
-                            stateOfNote = noteDetails[i];
-                        }                        
-                    }
+                principalRemainingOfNote = Double.Parse(noteDetails[10]);
 
-                    principalRemainingOfNote = Double.Parse(noteDetails[10]);
-
-                    // Increase the principal value in that state.
-                    states[stateOfNote] += Math.Round(principalRemainingOfNote, 2);
-     
-                }
+                // Increase the principal value in that state.
+                states[stateOfNote] += Math.Round(principalRemainingOfNote, 2);
             }
 
             // Sort the states in alphabetical order.
