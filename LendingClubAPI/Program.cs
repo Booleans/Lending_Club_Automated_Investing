@@ -308,11 +308,7 @@ namespace LendingClubAPI
                 // If the note is not current then skip to the next iteration of the foreach loop. 
                 if (!isNoteCurrent) continue;
 
-                for (int i = 0; i < noteDetails.Length; i++) {
-                    if (stateAbbreviations.Contains(noteDetails[i])) {
-                        stateOfNote = noteDetails[i];
-                    }                        
-                }
+                stateOfNote = noteDetails.First(detail => stateAbbreviations.Contains(detail));
 
                 principalRemainingOfNote = Double.Parse(noteDetails[10]);
 
