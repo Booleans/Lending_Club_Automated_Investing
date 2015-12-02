@@ -238,17 +238,19 @@ namespace LendingClubAPI
 
         public static Order BuildOrder(IEnumerable<Loan> loansToBuy, double amountToInvest)
         {
-            Order order = new Order();
-            order.aid = (Int32.Parse(accountNumber));
+            Order order = new Order {aid = (Int32.Parse(accountNumber))};
+
             List<LoanForOrder> loansToOrder = new List<LoanForOrder>();
 
             foreach (Loan loan in loansToBuy)
             {
-                LoanForOrder buyLoan = new LoanForOrder();
-                buyLoan.loanId = loan.id;
-                buyLoan.requestedAmount = amountToInvest;
-                buyLoan.portfolioId = null;
-                
+                LoanForOrder buyLoan = new LoanForOrder
+                {
+                    loanId = loan.id,
+                    requestedAmount = amountToInvest,
+                    portfolioId = null
+                };
+
                 loansToOrder.Add(buyLoan);
             }
 
