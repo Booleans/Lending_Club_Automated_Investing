@@ -93,8 +93,8 @@ namespace LendingClubAPI
                                  "SD","TN","TX","UT","VA",
                                  "VT","WA","WI","WV","WY"};
 
-            // Call calculateAndSetAllowedStatesFromCSV function to set the allowed states.
-            allowedStates = calculateAndSetAllowedStatesFromCSV(notesFromCSVFilePath);
+            // Call CalculateAndSetAllowedStatesFromCsv function to set the allowed states.
+            allowedStates = CalculateAndSetAllowedStatesFromCsv(notesFromCSVFilePath);
 
             // Use a stopwatch to terminate code after a certain duration.
             var stopwatch = new Stopwatch();
@@ -105,7 +105,7 @@ namespace LendingClubAPI
 
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = new Account();
-            myAccount = getAccountFromJson(RetrieveJsonString(accountSummaryUrl, authorizationToken));
+            myAccount = GetAccountFromJson(RetrieveJsonString(accountSummaryUrl, authorizationToken));
 
             // Get the total value of the account. 
             totalAccountValue = myAccount.accountTotal;
@@ -119,7 +119,7 @@ namespace LendingClubAPI
                 int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
                 // Retrieve list of notes owned to create a list of loan ID values.
-                myNotesOwned = getLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+                myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
 
                 List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
                                              select loan.loanId).ToList();
@@ -139,7 +139,7 @@ namespace LendingClubAPI
                     }
 
                     // Retrieve the latest offering of loans on the platform.
-                    NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
+                    NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
                     // Filter the new loans based off of my criteria. 
                     var filteredLoans = FilterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
@@ -154,7 +154,7 @@ namespace LendingClubAPI
 
                         string output = JsonConvert.SerializeObject(order);
 
-                        var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(submitOrder(submitOrderUrl, output, authorizationToken));
+                        var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, authorizationToken));
 
                         var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
@@ -196,19 +196,19 @@ namespace LendingClubAPI
         }
 
         // Method to convert JSON into account balance.
-        public static Account getAccountFromJson(string inputJson)
+        public static Account GetAccountFromJson(string inputJson)
         {
             Account accountDetails = JsonConvert.DeserializeObject<Account>(inputJson);
             return accountDetails;
         }
 
-        public static NotesOwned getLoansOwnedFromJson(string inputJson)
+        public static NotesOwned GetLoansOwnedFromJson(string inputJson)
         {
             NotesOwned notesOwned = JsonConvert.DeserializeObject<NotesOwned>(inputJson);
             return notesOwned;
         }
 
-        public static NewLoans getNewLoansFromJson(string inputJson)
+        public static NewLoans GetNewLoansFromJson(string inputJson)
         {
             NewLoans newLoans = JsonConvert.DeserializeObject<NewLoans>(inputJson);
             return newLoans;
@@ -256,7 +256,7 @@ namespace LendingClubAPI
             return order;
         }
 
-        public static string submitOrder(string postURL, string jsonToSubmit, string AuthToken)
+        public static string SubmitOrder(string postURL, string jsonToSubmit, string AuthToken)
         {
             
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(postURL);
@@ -279,7 +279,7 @@ namespace LendingClubAPI
             }
         }
 
-        public static string[] calculateAndSetAllowedStatesFromCSV(string CSVInputpath)
+        public static string[] CalculateAndSetAllowedStatesFromCsv(string CSVInputpath)
         {
             string allowedStatesFromCSV = File.ReadAllText(CSVInputpath);
             char[] delimiters = new char[] { '\r', '\n' };
@@ -287,7 +287,7 @@ namespace LendingClubAPI
 
             Dictionary<string, double> states = new Dictionary<string, double>();
 
-            // Population the dictionary with all states.
+            // Populate the dictionary with all states.
             foreach (string state in stateAbbreviations)
             {
                 // Add the state abbreviationg and set the principal balance to 0.
@@ -343,10 +343,8 @@ namespace LendingClubAPI
             return allowedStates;
         }
 
-        public static void downloadNotesOwnedCSV()
+        public static void DownloadNotesOwnedCsv()
         {
-
-            https://www.lendingclub.com/account/notesRawDataExtended.action
 
             WebClient webClient = new WebClient();
             webClient.UseDefaultCredentials = false;
