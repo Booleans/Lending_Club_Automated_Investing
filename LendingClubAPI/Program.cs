@@ -12,20 +12,20 @@ namespace LendingClubAPI
 {
     internal class Program
     {
-        static string accountNumber;
-        static string projectDirectory;
-        static string authorizationTokenFilePath;
-        static string allowedStatesCSVFilePath;
-        static double amountToInvest;
-        static string[] loanGradesAllowed;
-        static string latestLoansUrl;
-        static string detailedNotesOwnedUrl;
-        static string accountSummaryUrl;
-        static string submitOrderUrl;
-        static NotesOwned myNotesOwned;
-        static string authorizationToken;
-        static double accountBalance;
-        static string notesFromCSVFilePath;
+        public static string accountNumber;
+        public static string projectDirectory;
+        public static string authorizationTokenFilePath;
+        public static string allowedStatesCSVFilePath;
+        public static double amountToInvest;
+        public static string[] loanGradesAllowed;
+        public static string latestLoansUrl;
+        public static string detailedNotesOwnedUrl;
+        public static string accountSummaryUrl;
+        public static string submitOrderUrl;
+        public static NotesOwned myNotesOwned;
+        public static string authorizationToken;
+        public static double accountBalance;
+        public static string notesFromCSVFilePath;
         public static string[] stateAbbreviations;
         public static string[] allowedStates;
         public static double totalAccountValue;
