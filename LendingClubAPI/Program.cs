@@ -142,10 +142,10 @@ namespace LendingClubAPI
                     NewLoans latestListedLoans = getNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
 
                     // Filter the new loans based off of my criteria. 
-                    var filteredLoans = filterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
+                    var filteredLoans = FilterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
 
                     // We only need to build an order if filteredLoan is not null.
-                    if (filteredLoans.Count() > 0)
+                    if (filteredLoans.Any())
                     {
 
                         // Create a new order to purchase the filtered loans. 
@@ -163,10 +163,7 @@ namespace LendingClubAPI
                                               select confirmation.loanId);
 
                         // Add purchased loans to the list of loan IDs owned. 
-                        foreach (int l in loansPurchased)
-                        {
-                            loanIDsOwned.Add(l);
-                        }
+                        loanIDsOwned.AddRange(loansPurchased);
 
                         // Subtract successfully invested loans from account balance.
                         accountBalance -= loansPurchased.Count() * amountToInvest;
@@ -217,7 +214,7 @@ namespace LendingClubAPI
             return newLoans;
         }
 
-        public static IEnumerable<Loan> filterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates, List<int> loanIDsOwned, string[] gradesAllowed)
+        public static IEnumerable<Loan> FilterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates, List<int> loanIDsOwned, string[] gradesAllowed)
         {
 
             var filteredLoans = (from l in newLoans
