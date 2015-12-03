@@ -114,7 +114,10 @@ namespace LendingClubAPI
             accountBalance = myAccount.availableCash;
 
             // We only need to search for loans if the available balance >= minimum investment amount. 
-            if (!(accountBalance >= amountToInvest)) return;
+            if (accountBalance < amountToInvest)
+            {
+                return;
+            }
 
             int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
@@ -147,6 +150,7 @@ namespace LendingClubAPI
                 // We only need to build an order if filteredLoan is not null.
                 if (!filteredLoans.Any())
                 {
+                    // Wait one second before retrieving loans again if there are no loans passing the filter. 
                     Thread.Sleep(1000);
                     continue;
                 }
