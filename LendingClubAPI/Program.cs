@@ -114,64 +114,65 @@ namespace LendingClubAPI
             accountBalance = myAccount.availableCash;
 
             // We only need to search for loans if the available balance >= minimum investment amount. 
-            if (accountBalance >= amountToInvest)
-            {
-                int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
+            if (!(accountBalance >= amountToInvest)) return;
 
-                // Retrieve list of notes owned to create a list of loan ID values.
-                myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+            int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
-                List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
-                                             select loan.loanId).ToList();
+            // Retrieve list of notes owned to create a list of loan ID values.
+            myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+
+            List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
+                select loan.loanId).ToList();
                          
-                while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
+            while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
+            {
+                // If this is the first time retrieving listed loans, retrieve all.
+                // Retrieve only new loans for subsequent loops. 
+                if (getAllLoans)
                 {
-                    // If this is the first time retrieving listed loans, retrieve all.
-                    // Retrieve only new loans for subsequent loops. 
-                    if (getAllLoans == true)
-                    {
-                        latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
-                        getAllLoans = false;
-                    }
-                    else
-                    {
-                        latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=false";
-                    }
-
-                    // Retrieve the latest offering of loans on the platform.
-                    NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
-
-                    // Filter the new loans based off of my criteria. 
-                    var filteredLoans = FilterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
-
-                    // We only need to build an order if filteredLoan is not null.
-                    if (filteredLoans.Any())
-                    {
-
-                        // Create a new order to purchase the filtered loans. 
-                        Order order = new Order();
-                        order = BuildOrder(filteredLoans, amountToInvest);
-
-                        string output = JsonConvert.SerializeObject(order);
-
-                        var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, authorizationToken));
-
-                        var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
-
-                        var loansPurchased = (from confirmation in orderConfirmations
-                                              where confirmation.investedAmount >= 0
-                                              select confirmation.loanId);
-
-                        // Add purchased loans to the list of loan IDs owned. 
-                        loanIDsOwned.AddRange(loansPurchased);
-
-                        // Subtract successfully invested loans from account balance.
-                        accountBalance -= loansPurchased.Count() * amountToInvest;
-                    }
+                    latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
+                    getAllLoans = false;
+                }
+                else
+                {
+                    latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=false";
                 }
 
-                Console.ReadLine();
+                // Retrieve the latest offering of loans on the platform.
+                NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
+
+                // Filter the new loans based off of my criteria. 
+                var filteredLoans = FilterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
+
+                // We only need to build an order if filteredLoan is not null.
+                if (!filteredLoans.Any())
+                {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+
+                // Create a new order to purchase the filtered loans. 
+                Order order = new Order();
+                order = BuildOrder(filteredLoans, amountToInvest);
+
+                string output = JsonConvert.SerializeObject(order);
+
+                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, authorizationToken));
+
+                var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
+
+                var loansPurchased = (from confirmation in orderConfirmations
+                    where confirmation.investedAmount >= 0
+                    select confirmation.loanId);
+
+                // Add purchased loans to the list of loan IDs owned. 
+                loanIDsOwned.AddRange(loansPurchased);
+
+                // Subtract successfully invested loans from account balance.
+                accountBalance -= loansPurchased.Count() * amountToInvest;
             }
+
+            Console.ReadLine();
         }
 
         public static string RetrieveJsonString(string myURL, string AuthToken)
