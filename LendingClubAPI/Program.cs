@@ -181,9 +181,8 @@ namespace LendingClubAPI
             // Read authorization token from file.
             wrGETURL.Headers.Add("Authorization:" + AuthToken);
             wrGETURL.ContentType = "applicaton/json; charset=utf-8";
-      
-            Stream objStream;
-            objStream = wrGETURL.GetResponse().GetResponseStream();
+
+            var objStream = wrGETURL.GetResponse().GetResponseStream();
             //Variable for storing total portfolio value limit
             StreamReader objReader = new StreamReader(objStream);
 
@@ -333,9 +332,11 @@ namespace LendingClubAPI
         public static void DownloadNotesOwnedCsv()
         {
 
-            WebClient webClient = new WebClient();
-            webClient.UseDefaultCredentials = false;
-            webClient.Credentials = new NetworkCredential("andrewsnicholls@gmail.com", "testPassword");
+            var webClient = new WebClient
+            {
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential("andrewsnicholls@gmail.com", "testPassword")
+            };
 
             webClient.DownloadFile("https://www.lendingclub.com/account/notesRawDataExtended.csv", @"C:\notes.csv");
 
