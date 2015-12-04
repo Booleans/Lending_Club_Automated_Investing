@@ -50,9 +50,6 @@ namespace LendingClubAPI
             // authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
             authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
 
-            // Location of the file used to determine which states can be invested in.
-            allowedStatesCSVFilePath = projectDirectory + @"\AllowedStates.csv";
-
             // File path of the CSV file downloaded from Lending Club.
             // This data will be used to create the list of allowed states.
             notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
@@ -64,7 +61,7 @@ namespace LendingClubAPI
             amountToInvest = 25.0;
 
             // Loan grades that you are willing to invest in.
-            loanGradesAllowed = new string[] { "B", "C", "D" };
+            loanGradesAllowed = new string[] { "B", "C", "D", "E", "F", "G" };
 
             // Url for retrieving the latest listing of loans
             latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
