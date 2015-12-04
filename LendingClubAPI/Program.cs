@@ -101,8 +101,7 @@ namespace LendingClubAPI
             authorizationToken = File.ReadAllText(authorizationTokenFilePath);
 
             // Store the Account object to get balance and outstanding principal.
-            Account myAccount = new Account();
-            myAccount = GetAccountFromJson(RetrieveJsonString(accountSummaryUrl, authorizationToken));
+            Account myAccount = GetAccountFromJson(RetrieveJsonString(accountSummaryUrl));
 
             // Get the total value of the account. 
             totalAccountValue = myAccount.accountTotal;
@@ -116,10 +115,10 @@ namespace LendingClubAPI
                 return;
             }
 
-            int numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
+            var numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
 
             // Retrieve list of notes owned to create a list of loan ID values.
-            myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, authorizationToken));
+            myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
 
             List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
                 select loan.loanId).ToList();
@@ -139,7 +138,7 @@ namespace LendingClubAPI
                 }
 
                 // Retrieve the latest offering of loans on the platform.
-                NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, authorizationToken));
+                NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
 
                 // Filter the new loans based off of my criteria. 
                 var filteredLoans = FilterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
@@ -158,7 +157,7 @@ namespace LendingClubAPI
 
                 string output = JsonConvert.SerializeObject(order);
 
-                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, authorizationToken));
+                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output));
 
                 var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
@@ -176,12 +175,12 @@ namespace LendingClubAPI
             Console.ReadLine();
         }
 
-        public static string RetrieveJsonString(string myURL, string AuthToken)
+        public static string RetrieveJsonString(string myURL)
         {
-            WebRequest wrGETURL;
-            wrGETURL = WebRequest.Create(myURL);
+            WebRequest wrGETURL = WebRequest.Create(myURL);
+ 
             // Read authorization token from file.
-            wrGETURL.Headers.Add("Authorization:" + AuthToken);
+            wrGETURL.Headers.Add("Authorization:" + authorizationToken);
             wrGETURL.ContentType = "applicaton/json; charset=utf-8";
 
             var objStream = wrGETURL.GetResponse().GetResponseStream();
@@ -259,11 +258,11 @@ namespace LendingClubAPI
             return order;
         }
 
-        public static string SubmitOrder(string postURL, string jsonToSubmit, string AuthToken)
+        public static string SubmitOrder(string postURL, string jsonToSubmit)
         {
             
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(postURL);
-            httpWebRequest.Headers.Add("Authorization:" + AuthToken);
+            httpWebRequest.Headers.Add("Authorization:" + authorizationToken);
             httpWebRequest.ContentType = "application/json; charset=utf-8";
             httpWebRequest.Method = "POST";            
 
