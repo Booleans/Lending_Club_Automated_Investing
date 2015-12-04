@@ -121,7 +121,7 @@ namespace LendingClubAPI
             myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
 
             List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
-                select loan.loanId).ToList();
+                                       select loan.loanId).ToList();
                          
             while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
             {
