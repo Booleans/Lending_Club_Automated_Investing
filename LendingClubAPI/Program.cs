@@ -61,7 +61,7 @@ namespace LendingClubAPI
             amountToInvest = 25.0;
 
             // Loan grades that you are willing to invest in.
-            loanGradesAllowed = new string[] { "B", "C", "D", "E", "F", "G" };
+            loanGradesAllowed = new string[] { "B", "C", "D" };
 
             // Url for retrieving the latest listing of loans
             latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
