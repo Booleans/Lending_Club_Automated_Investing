@@ -287,14 +287,7 @@ namespace LendingClubAPI
             char[] delimiters = new char[] { '\r', '\n' };
             string[] allowedStates = allowedStatesFromCSV.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
-            Dictionary<string, double> states = new Dictionary<string, double>();
-
-            // Populate the dictionary with all states.
-            foreach (string state in stateAbbreviations)
-            {
-                // Add the state abbreviationg and set the principal balance to 0.
-                states.Add(state, 0.0);
-            }
+            Dictionary<string, double> states = stateAbbreviations.ToDictionary(state => state, state => 0.0);
 
             // Skip the first line because it contains the row headings. 
             foreach (string note in allowedStates.Skip(1))
