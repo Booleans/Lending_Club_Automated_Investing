@@ -313,9 +313,9 @@ namespace LendingClubAPI
 
             // Sort the states in alphabetical order.
             var sortedStates = from k in states
-                                where (k.Value <= statePercentLimit * totalAccountValue)
-                                orderby k.Key
-                                select k.Key;
+                               where (k.Value <= statePercentLimit * totalAccountValue)
+                               orderby k.Key
+                               select k.Key;
 
             // Set the allowedStates variable to the result of the query.
             allowedStates = sortedStates.ToArray();
