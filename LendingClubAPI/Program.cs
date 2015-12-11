@@ -184,8 +184,6 @@ namespace LendingClubAPI
             wrGETURL.ContentType = "applicaton/json; charset=utf-8";
 
             var objStream = wrGETURL.GetResponse().GetResponseStream();
-            //Variable for storing total portfolio value limit
-            StreamReader objReader = new StreamReader(objStream);
 
             using (StreamReader reader = new StreamReader(objStream))
             {
