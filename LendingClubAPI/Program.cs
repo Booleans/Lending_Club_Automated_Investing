@@ -162,8 +162,8 @@ namespace LendingClubAPI
                 var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
                 var loansPurchased = (from confirmation in orderConfirmations
-                    where confirmation.investedAmount >= 0
-                    select confirmation.loanId);
+                                      where confirmation.investedAmount >= 0
+                                      select confirmation.loanId);
 
                 // Add purchased loans to the list of loan IDs owned. 
                 loanIDsOwned.AddRange(loansPurchased);
@@ -319,19 +319,6 @@ namespace LendingClubAPI
             allowedStates = sortedStates.ToArray();
 
             return allowedStates;
-        }
-
-        public static void DownloadNotesOwnedCsv()
-        {
-
-            var webClient = new WebClient
-            {
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("andrewsnicholls@gmail.com", "testPassword")
-            };
-
-            webClient.DownloadFile("https://www.lendingclub.com/account/notesRawDataExtended.csv", @"C:\notes.csv");
-
         }
     }
 }
