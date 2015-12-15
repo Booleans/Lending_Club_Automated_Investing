@@ -14,66 +14,16 @@ namespace LendingClubAPI
     {
         public static string accountNumber;
         public static string projectDirectory;
-        public static string authorizationTokenFilePath;
-        public static string allowedStatesCSVFilePath;
-        public static double amountToInvest;
-        public static string[] loanGradesAllowed;
         public static string latestLoansUrl;
         public static string detailedNotesOwnedUrl;
         public static string accountSummaryUrl;
         public static string submitOrderUrl;
         public static NotesOwned myNotesOwned;
-        public static string authorizationToken;
-        public static double accountBalance;
-        public static string notesFromCSVFilePath;
         public static string[] stateAbbreviations;
-        public static string[] allowedStates;
-        public static double totalAccountValue;
-        public static bool getAllLoans;
-        public static double statePercentLimit;
+
 
         private static void Main(string[] args)
         {
-            //********************************************************************************************************************************//
-            //********************************************************************************************************************************//
-
-            // Boolean to change the get listed loans URL. After we've retrieved all loans, only retrieve new. 
-            getAllLoans = true;
-
-            // Limit outstanding principal in each state to no more than this % of the portfolio value.
-            statePercentLimit = .05;
-
-            // Find the directory of the project so we can use a relative path to the authorization token file. 
-            projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
-
-            // Location of the file that stores the account's authorization token.
-            // authorizationTokenFilePath = projectDirectory + @"\AndrewAuthorizationToken.txt";
-            authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
-
-            // File path of the CSV file downloaded from Lending Club.
-            // This data will be used to create the list of allowed states.
-            notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
-
-            // Account number that you want the code to run on.
-            accountNumber = "1302864";            
-
-            // How much should be invested per loan? Must be an increment of $25. 
-            amountToInvest = 25.0;
-
-            // Loan grades that you are willing to invest in.
-            loanGradesAllowed = new string[] { "B", "C", "D" };
-
-            // Url for retrieving the latest listing of loans
-            latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
-
-            // Url to retrieve the detailed list of notes owned
-            detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
-
-            // Url to retrieve account summary, which contains value of outstanding principal
-            accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/summary";
-
-            // Url to submit a request to buy loans
-            submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
 
@@ -90,21 +40,51 @@ namespace LendingClubAPI
                                  "SD","TN","TX","UT","VA",
                                  "VT","WA","WI","WV","WY"};
 
-            // Call CalculateAndSetAllowedStatesFromCsv function to set the allowed states.
-            allowedStates = CalculateAndSetAllowedStatesFromCsv(notesFromCSVFilePath);
+            // Find the directory of the project so we can use a relative path to the authorization token file. 
+            projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
+
+            // Create an account object for Andrew's account. We'll use this to invest. 
+            Account andrewAccount = new Account
+            {
+                // Each individual state should be limited to what percent of the total portfolio value?
+                statePercentLimit = 0.05,
+                // How much should you invest in each new loan?
+                amountToInvestPerLoan = 25.0,
+                // Which loan grades is this account allowed to invest in?
+                loanGradesAllowed = new string[] {"B", "C", "D"},
+                // What is the path to the txt file that contains your authorization token string?
+                authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt",
+                // File path of the CSV file downloaded from Lending Club.
+                // This data will be used to create the list of allowed states.
+                notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv",
+            };
+
+            andrewAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewAccount.notesFromCSVFilePath);
+            andrewAccount.authorizationToken = File.ReadAllText(andrewAccount.authorizationTokenFilePath);
+
+            // Account number that you want the code to run on.
+            accountNumber = "1302864";            
+            
+            // Url for retrieving the latest listing of loans
+            latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
+
+            // Url to retrieve the detailed list of notes owned
+            detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
+
+            // Url to retrieve account summary, which contains value of outstanding principal
+            accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/summary";
+
+            // Url to submit a request to buy loans
+            submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
+            //********************************************************************************************************************************//
+            //********************************************************************************************************************************//
 
             // Use a stopwatch to terminate code after a certain duration.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            // Read authorization token stored in text file.
-            authorizationToken = File.ReadAllText(authorizationTokenFilePath);
-
             // Store the Account object to get balance and outstanding principal.
             Account myAccount = GetAccountFromJson(RetrieveJsonString(accountSummaryUrl));
-
-            // Get the total value of the account. 
-            totalAccountValue = myAccount.accountTotal;
 
             // Variable for storing cash balance available.
             accountBalance = myAccount.availableCash;
