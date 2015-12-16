@@ -42,7 +42,7 @@ namespace LendingClubAPI
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
-            var andrewAuthorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
+            const string andrewAuthorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
             var andrewAuthorizationToken = File.ReadAllText(andrewAuthorizationTokenFilePath);
 
             // Store the Account object to get balance and outstanding principal.
@@ -87,7 +87,7 @@ namespace LendingClubAPI
             andrewAccount.loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
                                           select loan.loanId).ToList();
                          
-            while (stopwatch.ElapsedMilliseconds < 120000 && andrewAccount.availableCash >= 0)
+            while (stopwatch.ElapsedMilliseconds < 120000 && andrewAccount.availableCash >= andrewAccount.amountToInvestPerLoan)
             {
                 // If this is the first time retrieving listed loans, retrieve all.
                 // Retrieve only new loans for subsequent loops. 
@@ -116,9 +116,8 @@ namespace LendingClubAPI
                 }
 
                 // Create a new order to purchase the filtered loans. 
-                Order order = new Order();
-                order = BuildOrder(filteredLoans, andrewAccount.amountToInvestPerLoan, andrewAccount.investorID);
-
+                Order order = BuildOrder(filteredLoans, andrewAccount.amountToInvestPerLoan, andrewAccount.investorID);
+             
                 string output = JsonConvert.SerializeObject(order);
 
                 var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, andrewAccount.authorizationToken));
