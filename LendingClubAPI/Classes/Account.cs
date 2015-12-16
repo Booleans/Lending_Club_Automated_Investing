@@ -26,6 +26,6 @@ namespace LendingClubAPI
         public bool getAllLoans { get; set; } = true;
         public List<int> loanIDsOwned { get; set; }
         public string[] allowedStates { get; set; }
-
+        public int numberOfLoansToInvestIn { get; set; }
     }
 }

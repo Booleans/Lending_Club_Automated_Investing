@@ -12,7 +12,6 @@ namespace LendingClubAPI
 {
     internal class Program
     {
-        public static string accountNumber;
         public static string projectDirectory;
         public static string latestLoansUrl;
         public static string detailedNotesOwnedUrl;
@@ -43,39 +42,32 @@ namespace LendingClubAPI
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
-            // Create an account object for Andrew's account. We'll use this to invest. 
-            Account andrewAccount = new Account
-            {
-                // Each individual state should be limited to what percent of the total portfolio value?
-                statePercentLimit = 0.05,
-                // How much should you invest in each new loan?
-                amountToInvestPerLoan = 25.0,
-                // Which loan grades is this account allowed to invest in?
-                loanGradesAllowed = new string[] {"B", "C", "D"},
-                // What is the path to the txt file that contains your authorization token string?
-                authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt",
-                // File path of the CSV file downloaded from Lending Club.
-                // This data will be used to create the list of allowed states.
-                notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv",
-            };
+            var andrewAuthorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
+            var andrewAuthorizationToken = File.ReadAllText(andrewAuthorizationTokenFilePath);
 
-            andrewAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewAccount.notesFromCSVFilePath);
-            andrewAccount.authorizationToken = File.ReadAllText(andrewAccount.authorizationTokenFilePath);
+            // Store the Account object to get balance and outstanding principal.
+            Account andrewAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary", andrewAuthorizationToken));
 
-            // Account number that you want the code to run on.
-            accountNumber = "1302864";            
-            
+            andrewAccount.authorizationToken = andrewAuthorizationToken;
+            andrewAccount.statePercentLimit = 0.05;
+            andrewAccount.amountToInvestPerLoan = 25.0;
+            andrewAccount.loanGradesAllowed = new string[] {"B", "C", "D"};
+            andrewAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
+            andrewAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
+            andrewAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewAccount.notesFromCSVFilePath, andrewAccount.statePercentLimit, andrewAccount.accountTotal);
+            andrewAccount.numberOfLoansToInvestIn = (int)(andrewAccount.availableCash / andrewAccount.amountToInvestPerLoan);
+
             // Url for retrieving the latest listing of loans
             latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
 
             // Url to retrieve the detailed list of notes owned
-            detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/"+ accountNumber +"/detailednotes";
+            detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
 
             // Url to retrieve account summary, which contains value of outstanding principal
-            accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/summary";
+            accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary";
 
             // Url to submit a request to buy loans
-            submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + accountNumber + "/orders";
+            submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
 
@@ -83,34 +75,26 @@ namespace LendingClubAPI
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            // Store the Account object to get balance and outstanding principal.
-            Account myAccount = GetAccountFromJson(RetrieveJsonString(accountSummaryUrl));
-
-            // Variable for storing cash balance available.
-            accountBalance = myAccount.availableCash;
-
             // We only need to search for loans if the available balance >= minimum investment amount. 
-            if (accountBalance < amountToInvest)
+            if (andrewAccount.availableCash < andrewAccount.amountToInvestPerLoan)
             {
                 return;
             }
 
-            var numberOfLoansToBuy = (int) (accountBalance / amountToInvest);
-
             // Retrieve list of notes owned to create a list of loan ID values.
-            myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl));
+            myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, andrewAccount.authorizationToken));
 
-            List <int> loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
-                                       select loan.loanId).ToList();
+            andrewAccount.loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
+                                          select loan.loanId).ToList();
                          
-            while (stopwatch.ElapsedMilliseconds < 120000 && accountBalance >= 0)
+            while (stopwatch.ElapsedMilliseconds < 120000 && andrewAccount.availableCash >= 0)
             {
                 // If this is the first time retrieving listed loans, retrieve all.
                 // Retrieve only new loans for subsequent loops. 
-                if (getAllLoans)
+                if (andrewAccount.getAllLoans)
                 {
                     latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
-                    getAllLoans = false;
+                    andrewAccount.getAllLoans = false;
                 }
                 else
                 {
@@ -118,10 +102,10 @@ namespace LendingClubAPI
                 }
 
                 // Retrieve the latest offering of loans on the platform.
-                NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl));
+                NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, andrewAccount.authorizationToken));
 
                 // Filter the new loans based off of my criteria. 
-                var filteredLoans = FilterNewLoans(latestListedLoans.loans, numberOfLoansToBuy, allowedStates, loanIDsOwned, loanGradesAllowed);
+                var filteredLoans = FilterNewLoans(latestListedLoans.loans, andrewAccount);
 
                 // We only need to build an order if filteredLoan is not null.
                 if (!filteredLoans.Any())
@@ -133,11 +117,11 @@ namespace LendingClubAPI
 
                 // Create a new order to purchase the filtered loans. 
                 Order order = new Order();
-                order = BuildOrder(filteredLoans, amountToInvest);
+                order = BuildOrder(filteredLoans, andrewAccount.amountToInvestPerLoan, andrewAccount.investorID);
 
                 string output = JsonConvert.SerializeObject(order);
 
-                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output));
+                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, andrewAccount.authorizationToken));
 
                 var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
@@ -146,16 +130,16 @@ namespace LendingClubAPI
                                       select confirmation.loanId);
 
                 // Add purchased loans to the list of loan IDs owned. 
-                loanIDsOwned.AddRange(loansPurchased);
+                andrewAccount.loanIDsOwned.AddRange(loansPurchased);
 
                 // Subtract successfully invested loans from account balance.
-                accountBalance -= loansPurchased.Count() * amountToInvest;
+                andrewAccount.availableCash -= loansPurchased.Count() * andrewAccount.amountToInvestPerLoan;
             }
 
             Console.ReadLine();
         }
 
-        public static string RetrieveJsonString(string myURL)
+        public static string RetrieveJsonString(string myURL, string authorizationToken)
         {
             WebRequest wrGETURL = WebRequest.Create(myURL);
  
@@ -192,7 +176,7 @@ namespace LendingClubAPI
             return newLoans;
         }
 
-        public static IEnumerable<Loan> FilterNewLoans(List<Loan> newLoans, int numberOfLoansToInvestIn, string[] allowedStates, List<int> loanIDsOwned, string[] gradesAllowed)
+        public static IEnumerable<Loan> FilterNewLoans(List<Loan> newLoans, Account accountToUse)
         {
 
             var filteredLoans = (from l in newLoans
@@ -202,19 +186,19 @@ namespace LendingClubAPI
                                  (l.intRate >= 10.0) &&
                                  //(l.intRate <= 18.0) &&
                                  (l.term == 36) &&
-                                 (gradesAllowed.Contains(l.grade)) &&
+                                 (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
                                  (l.loanAmount <= 1.1*l.revolBal) &&
                                  (l.loanAmount >= .9*l.revolBal) &&
-                                 (allowedStates.Contains(l.addrState.ToString())) &&
-                                 (!loanIDsOwned.Contains(l.id))
+                                 (accountToUse.allowedStates.Contains(l.addrState.ToString())) &&
+                                 (!accountToUse.loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending                                                            
-                                 select l).Take(numberOfLoansToInvestIn);
+                                 select l).Take(accountToUse.numberOfLoansToInvestIn);
             
             return filteredLoans;
         }
 
-        public static Order BuildOrder(IEnumerable<Loan> loansToBuy, double amountToInvest)
+        public static Order BuildOrder(IEnumerable<Loan> loansToBuy, double amountToInvest, string accountNumber)
         {
             Order order = new Order {aid = (Int32.Parse(accountNumber))};
 
@@ -236,7 +220,7 @@ namespace LendingClubAPI
             return order;
         }
 
-        public static string SubmitOrder(string postURL, string jsonToSubmit)
+        public static string SubmitOrder(string postURL, string jsonToSubmit, string authorizationToken)
         {
             
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(postURL);
@@ -259,7 +243,7 @@ namespace LendingClubAPI
             }
         }
 
-        public static string[] CalculateAndSetAllowedStatesFromCsv(string CSVInputpath)
+        public static string[] CalculateAndSetAllowedStatesFromCsv(string CSVInputpath, double statePercentLimit, double totalAccountValue)
         {
             string allowedStatesFromCSV = File.ReadAllText(CSVInputpath);
             char[] delimiters = new char[] { '\r', '\n' };
