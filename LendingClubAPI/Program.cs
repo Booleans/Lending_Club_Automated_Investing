@@ -12,12 +12,7 @@ namespace LendingClubAPI
 {
     internal class Program
     {
-        public static string projectDirectory;
         public static string latestLoansUrl;
-        public static string detailedNotesOwnedUrl;
-        public static string accountSummaryUrl;
-        public static string submitOrderUrl;
-        public static NotesOwned myNotesOwned;
         public static string[] stateAbbreviations;
 
 
@@ -25,7 +20,6 @@ namespace LendingClubAPI
         {
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
-
             // We need an array of possible state abbreviations.
             stateAbbreviations = new string[] {
                                  "AK","AL","AR","AZ","CA",
@@ -40,7 +34,7 @@ namespace LendingClubAPI
                                  "VT","WA","WI","WV","WY"};
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
-            projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
+            string projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
             const string andrewAuthorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
             var andrewAuthorizationToken = File.ReadAllText(andrewAuthorizationTokenFilePath);
@@ -56,18 +50,12 @@ namespace LendingClubAPI
             andrewAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
             andrewAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewAccount.notesFromCSVFilePath, andrewAccount.statePercentLimit, andrewAccount.accountTotal);
             andrewAccount.numberOfLoansToInvestIn = (int)(andrewAccount.availableCash / andrewAccount.amountToInvestPerLoan);
-
-            // Url for retrieving the latest listing of loans
-            latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=true";
-
-            // Url to retrieve the detailed list of notes owned
-            detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/detailednotes";
-
-            // Url to retrieve account summary, which contains value of outstanding principal
-            accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary";
-
-            // Url to submit a request to buy loans
-            submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/1302864/orders";
+            andrewAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewAccount.investorID + "/detailednotes";
+            andrewAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewAccount.investorID + "/summary";
+            andrewAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewAccount.investorID + "/orders";
+            andrewAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewAccount.detailedNotesOwnedUrl, andrewAccount.authorizationToken));
+            andrewAccount.loanIDsOwned = (from loan in andrewAccount.notesOwnedByAccount.myNotes.AsEnumerable()
+                                          select loan.loanId).ToList();
             //********************************************************************************************************************************//
             //********************************************************************************************************************************//
 
@@ -81,12 +69,6 @@ namespace LendingClubAPI
                 return;
             }
 
-            // Retrieve list of notes owned to create a list of loan ID values.
-            myNotesOwned = GetLoansOwnedFromJson(RetrieveJsonString(detailedNotesOwnedUrl, andrewAccount.authorizationToken));
-
-            andrewAccount.loanIDsOwned = (from loan in myNotesOwned.myNotes.AsEnumerable()
-                                          select loan.loanId).ToList();
-                         
             while (stopwatch.ElapsedMilliseconds < 120000 && andrewAccount.availableCash >= andrewAccount.amountToInvestPerLoan)
             {
                 // If this is the first time retrieving listed loans, retrieve all.
@@ -120,7 +102,7 @@ namespace LendingClubAPI
              
                 string output = JsonConvert.SerializeObject(order);
 
-                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(submitOrderUrl, output, andrewAccount.authorizationToken));
+                var orderResponse = JsonConvert.DeserializeObject<CompleteOrderConfirmation>(SubmitOrder(andrewAccount.submitOrderUrl, output, andrewAccount.authorizationToken));
 
                 var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
