@@ -236,10 +236,7 @@ namespace LendingClubAPI
                                orderby k.Key
                                select k.Key;
 
-            // Set the allowedStates variable to the result of the query.
-            allowedStates = sortedStates.ToArray();
-
-            return allowedStates;
+            return sortedStates.ToArray();
         }
 
         public static List<Account> InstantiateAccounts()
