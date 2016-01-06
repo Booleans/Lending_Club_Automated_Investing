@@ -270,6 +270,28 @@ namespace LendingClubAPI
 
             activeAccounts.Add(andrewTaxableAccount);
 
+            const string andrewRothAuthorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
+            var andrewRothAuthorizationToken = File.ReadAllText(andrewRothAuthorizationTokenFilePath);
+
+            Account andrewRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/?????/summary", andrewRothAuthorizationToken));
+
+            andrewRothAccount.authorizationToken = andrewRothAuthorizationToken;
+            andrewRothAccount.statePercentLimit = 0.05;
+            andrewRothAccount.amountToInvestPerLoan = 25.0;
+            andrewRothAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
+            andrewRothAccount.authorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
+            andrewRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
+            andrewRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewRothAccount.notesFromCSVFilePath, andrewRothAccount.statePercentLimit, andrewRothAccount.accountTotal);
+            andrewRothAccount.numberOfLoansToInvestIn = (int)(andrewRothAccount.availableCash / andrewRothAccount.amountToInvestPerLoan);
+            andrewRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/detailednotes";
+            andrewRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/summary";
+            andrewRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/orders";
+            andrewRothAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewRothAccount.detailedNotesOwnedUrl, andrewRothAccount.authorizationToken));
+            andrewRothAccount.loanIDsOwned = (from loan in andrewRothAccount.notesOwnedByAccount.myNotes.AsEnumerable()
+                                                 select loan.loanId).ToList();
+
+            activeAccounts.Add(andrewRothAccount);
+
             return activeAccounts;
         }
     }
