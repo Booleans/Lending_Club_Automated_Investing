@@ -288,9 +288,31 @@ namespace LendingClubAPI
             andrewRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/orders";
             andrewRothAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewRothAccount.detailedNotesOwnedUrl, andrewRothAccount.authorizationToken));
             andrewRothAccount.loanIDsOwned = (from loan in andrewRothAccount.notesOwnedByAccount.myNotes.AsEnumerable()
-                                                 select loan.loanId).ToList();
+                                              select loan.loanId).ToList();
 
             activeAccounts.Add(andrewRothAccount);
+
+            const string dadRothAuthorizationTokenFilePath = @"C:\dadRothAuthorizationToken.txt";
+            var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
+
+            Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/?????/summary", dadRothAuthorizationToken));
+
+            dadRothAccount.authorizationToken = andrewRothAuthorizationToken;
+            dadRothAccount.statePercentLimit = 0.05;
+            dadRothAccount.amountToInvestPerLoan = 25.0;
+            dadRothAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
+            dadRothAccount.authorizationTokenFilePath = @"C:\dadRothAuthorizationToken.txt";
+            dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
+            dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
+            dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
+            dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
+            dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";
+            dadRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/orders";
+            dadRothAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(dadRothAccount.detailedNotesOwnedUrl, dadRothAccount.authorizationToken));
+            dadRothAccount.loanIDsOwned = (from loan in dadRothAccount.notesOwnedByAccount.myNotes.AsEnumerable()
+                                              select loan.loanId).ToList();
+
+            activeAccounts.Add(dadRothAccount);
 
             return activeAccounts;
         }
