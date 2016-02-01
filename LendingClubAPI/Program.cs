@@ -211,7 +211,7 @@ namespace LendingClubAPI
             // Skip the first line because it contains the row headings. 
             foreach (string note in allowedStates.Skip(1))
             {
-                string stateOfNote = null;
+              
                 double principalRemainingOfNote = 0;
 
                 var noteDetails = note.Split(',');
@@ -222,7 +222,7 @@ namespace LendingClubAPI
                 // If the note is not current then skip to the next iteration of the foreach loop. 
                 if (!isNoteCurrent) continue;
 
-                stateOfNote = noteDetails.First(detail => stateAbbreviations.Contains(detail));
+                string stateOfNote = noteDetails.First(detail => stateAbbreviations.Contains(detail));
 
                 principalRemainingOfNote = Double.Parse(noteDetails[10]);
 
