@@ -270,37 +270,37 @@ namespace LendingClubAPI
 
             activeAccounts.Add(andrewTaxableAccount);
 
-            const string andrewRothAuthorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
-            var andrewRothAuthorizationToken = File.ReadAllText(andrewRothAuthorizationTokenFilePath);
+            //const string andrewRothAuthorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
+            //var andrewRothAuthorizationToken = File.ReadAllText(andrewRothAuthorizationTokenFilePath);
 
-            Account andrewRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/?????/summary", andrewRothAuthorizationToken));
+            //Account andrewRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/?????/summary", andrewRothAuthorizationToken));
 
-            andrewRothAccount.authorizationToken = andrewRothAuthorizationToken;
-            andrewRothAccount.statePercentLimit = 0.05;
-            andrewRothAccount.amountToInvestPerLoan = 25.0;
-            andrewRothAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
-            andrewRothAccount.authorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
-            andrewRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
-            andrewRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewRothAccount.notesFromCSVFilePath, andrewRothAccount.statePercentLimit, andrewRothAccount.accountTotal);
-            andrewRothAccount.numberOfLoansToInvestIn = (int)(andrewRothAccount.availableCash / andrewRothAccount.amountToInvestPerLoan);
-            andrewRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/detailednotes";
-            andrewRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/summary";
-            andrewRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/orders";
-            andrewRothAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewRothAccount.detailedNotesOwnedUrl, andrewRothAccount.authorizationToken));
-            andrewRothAccount.loanIDsOwned = (from loan in andrewRothAccount.notesOwnedByAccount.myNotes.AsEnumerable()
-                                              select loan.loanId).ToList();
+            //andrewRothAccount.authorizationToken = andrewRothAuthorizationToken;
+            //andrewRothAccount.statePercentLimit = 0.05;
+            //andrewRothAccount.amountToInvestPerLoan = 25.0;
+            //andrewRothAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
+            //andrewRothAccount.authorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
+            //andrewRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
+            //andrewRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewRothAccount.notesFromCSVFilePath, andrewRothAccount.statePercentLimit, andrewRothAccount.accountTotal);
+            //andrewRothAccount.numberOfLoansToInvestIn = (int)(andrewRothAccount.availableCash / andrewRothAccount.amountToInvestPerLoan);
+            //andrewRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/detailednotes";
+            //andrewRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/summary";
+            //andrewRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewRothAccount.investorID + "/orders";
+            //andrewRothAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewRothAccount.detailedNotesOwnedUrl, andrewRothAccount.authorizationToken));
+            //andrewRothAccount.loanIDsOwned = (from loan in andrewRothAccount.notesOwnedByAccount.myNotes.AsEnumerable()
+            //                                  select loan.loanId).ToList();
 
-            activeAccounts.Add(andrewRothAccount);
+            //activeAccounts.Add(andrewRothAccount);
 
             const string dadRothAuthorizationTokenFilePath = @"C:\dadRothAuthorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
 
             Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/?????/summary", dadRothAuthorizationToken));
 
-            dadRothAccount.authorizationToken = andrewRothAuthorizationToken;
+            dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
-            dadRothAccount.amountToInvestPerLoan = 25.0;
-            dadRothAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
+            dadRothAccount.amountToInvestPerLoan = 75.0;
+            dadRothAccount.loanGradesAllowed = new string[] { "A", "B"};
             dadRothAccount.authorizationTokenFilePath = @"C:\dadRothAuthorizationToken.txt";
             dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
@@ -315,6 +315,22 @@ namespace LendingClubAPI
             activeAccounts.Add(dadRothAccount);
 
             return activeAccounts;
+        }
+
+        public static int[] ReadTradedNotesFromCsv(string tradedNotesFilePath)
+        {
+            // We need to keep track of the loan IDs of loans we have invested in but have not yet been issued. These notes will not appear in the
+            // notes_ext.csv file so we will have to save and load them separately to/from a CSV or text file. 
+            var stringIDsFromCsv = File.ReadAllText(tradedNotesFilePath);
+            var stringArrayLoans = stringIDsFromCsv.Split(',');
+            int[] myInts = Array.ConvertAll(stringArrayLoans, int.Parse);
+            return myInts;
+        }
+
+        public static void WriteTradedNotesToCsv(int[] tradedNotes, string savedNotesFilePath)
+        {
+            var notesPurchased = string.Join(",", tradedNotes);
+            File.WriteAllText(savedNotesFilePath, notesPurchased);
         }
     }
 }
