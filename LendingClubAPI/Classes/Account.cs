@@ -35,5 +35,6 @@ namespace LendingClubAPI
         public double minimumInterestRate { get; set; }
         public int minimumAnnualIncome { get; set; }
         public double maximumRevolvingBalance { get; set; }
+        public string[] allowedHomeOwnership { get; set; }
     }
 }

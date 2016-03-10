@@ -14,6 +14,17 @@ namespace LendingClubAPI
     internal class Program
     {
         public static string latestLoansUrl;
+        public static string[] stateAbbreviations = new string[] {
+                                 "AK","AL","AR","AZ","CA",
+                                 "CO","CT","DE","FL","GA",
+                                 "HI","IA","ID","IL","IN",
+                                 "KS","KY","LA","MA","MD",
+                                 "ME","MI","MN","MO","MS",
+                                 "MT","NC","ND","NE","NH",
+                                 "NJ","NM","NV","NY","OH",
+                                 "OK","OR","PA","RI","SC",
+                                 "SD","TN","TX","UT","VA",
+                                 "VT","WA","WI","WV","WY"};
 
         private static void Main(string[] args)
         {
@@ -137,7 +148,7 @@ namespace LendingClubAPI
                                  (l.mthsSinceLastDelinq == null) &&
                                  (l.loanAmount <= 1.1*l.revolBal) &&
                                  (l.loanAmount >= .9*l.revolBal) &&
-                                 (accountToUse.allowedStates.Contains(l.addrState.ToString())) &&
+                                 (accountToUse.allowedStates.Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending                                                            
                                  select l).Take(accountToUse.numberOfLoansToInvestIn);
@@ -196,18 +207,6 @@ namespace LendingClubAPI
             char[] delimiters = new char[] { '\r', '\n' };
             string[] allowedStates = allowedStatesFromCSV.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
-            string[] stateAbbreviations = new string[] {
-                                 "AK","AL","AR","AZ","CA",
-                                 "CO","CT","DE","FL","GA",
-                                 "HI","IA","ID","IL","IN",
-                                 "KS","KY","LA","MA","MD",
-                                 "ME","MI","MN","MO","MS",
-                                 "MT","NC","ND","NE","NH",
-                                 "NJ","NM","NV","NY","OH",
-                                 "OK","OR","PA","RI","SC",
-                                 "SD","TN","TX","UT","VA",
-                                 "VT","WA","WI","WV","WY"};
-
             Dictionary<string, double> states = stateAbbreviations.ToDictionary(state => state, state => 0.0);
 
             // Skip the first line because it contains the row headings. 
@@ -263,7 +262,8 @@ namespace LendingClubAPI
             andrewTaxableAccount.maximumRevolvingBalance = 9999999;
             andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
             andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
-            andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
+            //andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
+            andrewTaxableAccount.allowedStates = stateAbbreviations;
             //andrewTaxableAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewTaxableAccount.notesFromCSVFilePath, andrewTaxableAccount.statePercentLimit, andrewTaxableAccount.accountTotal);
             //andrewTaxableAccount.numberOfLoansToInvestIn = (int)(andrewTaxableAccount.availableCash / andrewTaxableAccount.amountToInvestPerLoan);
             andrewTaxableAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/detailednotes";
@@ -311,6 +311,7 @@ namespace LendingClubAPI
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
             dadRothAccount.authorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
+            dadRothAccount.allowedStates = stateAbbreviations;
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
