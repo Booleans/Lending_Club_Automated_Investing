@@ -42,7 +42,7 @@ namespace LendingClubAPI
                     return;
                 }
 
-                while (stopwatch.ElapsedMilliseconds < 120000 && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
+                while (stopwatch.ElapsedMilliseconds < 60000 && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
                 {
                     // If this is the first time retrieving listed loans, retrieve all.
                     // Retrieve only new loans for subsequent loops. 
@@ -87,6 +87,15 @@ namespace LendingClubAPI
                     var loansPurchased = (from confirmation in orderConfirmations
                                           where confirmation.investedAmount >= 0
                                           select confirmation.loanId);
+
+                    if (loansPurchased.Any())
+                    {
+                        foreach (var loan in loansPurchased)
+                        {
+                            Console.WriteLine("The account {0} purchased loan ID: {1}", investableAccount.accountTitle, loan);
+                        } 
+                    }
+
 
                     // Add purchased loans to the list of loan IDs owned. 
                     investableAccount.loanIDsOwned.AddRange(loansPurchased);
@@ -258,6 +267,7 @@ namespace LendingClubAPI
             // Store the Account object to get balance and outstanding principal.
             Account andrewTaxableAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary", andrewAuthorizationToken));
 
+            andrewTaxableAccount.accountTitle = "Andrew's Taxable Account";
             andrewTaxableAccount.authorizationToken = andrewAuthorizationToken;
             andrewTaxableAccount.minimumInterestRate = 10.0;
             andrewTaxableAccount.statePercentLimit = 0.05;
@@ -301,11 +311,12 @@ namespace LendingClubAPI
 
             //activeAccounts.Add(andrewRothAccount);
 
-            const string dadRothAuthorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
+            const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAutorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
 
             Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/77100250/summary", dadRothAuthorizationToken));
 
+            dadRothAccount.accountTitle = "Dad's Roth Account";
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
             dadRothAccount.amountToInvestPerLoan = 75.0;
@@ -313,7 +324,7 @@ namespace LendingClubAPI
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maximumRevolvingBalance = 15000;
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
-            dadRothAccount.authorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
+            dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAutorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             dadRothAccount.allowedStates = stateAbbreviations;
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
