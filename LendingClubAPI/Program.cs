@@ -39,8 +39,13 @@ namespace LendingClubAPI
                 // We only need to search for loans if the available balance >= minimum investment amount. 
                 if (investableAccount.availableCash < investableAccount.amountToInvestPerLoan)
                 {
+                    Console.WriteLine("{0} does not have enough cash available to invest", investableAccount.accountTitle);
+                    Console.WriteLine("Amount of cash currently available: ${0}", investableAccount.availableCash);
                     return;
                 }
+
+                Console.WriteLine("Searching for loans for the following account: {0}", investableAccount.accountTitle);
+                Console.WriteLine("Amount of cash currently available: ${0}", investableAccount.availableCash);
 
                 while (stopwatch.ElapsedMilliseconds < 60000 && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
                 {
@@ -92,7 +97,7 @@ namespace LendingClubAPI
                     {
                         foreach (var loan in loansPurchased)
                         {
-                            Console.WriteLine("The account {0} purchased loan ID: {1}", investableAccount.accountTitle, loan);
+                            Console.WriteLine("The account {0} purchased loan ID: {1} at {2}", investableAccount.accountTitle, loan, DateTime.Now.ToShortTimeString());
                         } 
                     }
 
@@ -106,6 +111,7 @@ namespace LendingClubAPI
 
             });
 
+            Console.WriteLine("Execution has completed");
             Console.ReadLine();
         }
 
