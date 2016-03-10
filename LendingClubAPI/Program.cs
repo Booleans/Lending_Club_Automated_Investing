@@ -59,6 +59,11 @@ namespace LendingClubAPI
                     // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, investableAccount.authorizationToken));
 
+                    if (latestListedLoans.loans == null)
+                    {
+                        continue;
+                    }
+
                     // Filter the new loans based off of my criteria. 
                     var filteredLoans = FilterNewLoans(latestListedLoans.loans, investableAccount);
 
@@ -141,7 +146,6 @@ namespace LendingClubAPI
                                  (l.inqLast6Mths == 0) &&
                                  (l.pubRec == 0) &&
                                  (l.intRate >= accountToUse.minimumInterestRate) &&
-                                 (l.revolBal <= accountToUse.maximumRevolvingBalance) &&
                                  //(l.intRate <= 18.0) &&
                                  (l.term == 36) &&
                                  (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
@@ -324,22 +328,6 @@ namespace LendingClubAPI
             activeAccounts.Add(dadRothAccount);
 
             return activeAccounts;
-        }
-
-        public static int[] ReadTradedNotesFromCsv(string tradedNotesFilePath)
-        {
-            // We need to keep track of the loan IDs of loans we have invested in but have not yet been issued. These notes will not appear in the
-            // notes_ext.csv file so we will have to save and load them separately to/from a CSV or text file. 
-            var stringIDsFromCsv = File.ReadAllText(tradedNotesFilePath);
-            var stringArrayLoans = stringIDsFromCsv.Split(',');
-            int[] myInts = Array.ConvertAll(stringArrayLoans, int.Parse);
-            return myInts;
-        }
-
-        public static void WriteTradedNotesToCsv(int[] tradedNotes, string savedNotesFilePath)
-        {
-            var notesPurchased = string.Join(",", tradedNotes);
-            File.WriteAllText(savedNotesFilePath, notesPurchased);
         }
     }
 }
