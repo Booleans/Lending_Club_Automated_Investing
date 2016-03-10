@@ -167,6 +167,7 @@ namespace LendingClubAPI
                                  (l.mthsSinceLastDelinq == null) &&
                                  //(l.loanAmount <= 1.1*l.revolBal) &&
                                  //(l.loanAmount >= .9*l.revolBal) &&
+                                 (accountToUse.allowedHomeOwnership.Contains(l.homeOwnership)) &&
                                  (accountToUse.allowedStates.Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending                                                            
@@ -317,7 +318,7 @@ namespace LendingClubAPI
 
             //activeAccounts.Add(andrewRothAccount);
 
-            const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAutorizationToken.txt";
+            const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
 
             Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/77100250/summary", dadRothAuthorizationToken));
@@ -330,7 +331,7 @@ namespace LendingClubAPI
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maximumRevolvingBalance = 15000;
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
-            dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAutorizationToken.txt";
+            dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             dadRothAccount.allowedStates = stateAbbreviations;
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
