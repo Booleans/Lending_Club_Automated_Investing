@@ -165,8 +165,8 @@ namespace LendingClubAPI
                                  (l.term == 36) &&
                                  (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
-                                 (l.loanAmount <= 1.1*l.revolBal) &&
-                                 (l.loanAmount >= .9*l.revolBal) &&
+                                 //(l.loanAmount <= 1.1*l.revolBal) &&
+                                 //(l.loanAmount >= .9*l.revolBal) &&
                                  (accountToUse.allowedStates.Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending                                                            
