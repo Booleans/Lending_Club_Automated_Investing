@@ -125,10 +125,12 @@ namespace LendingClubAPI
         {
 
             var filteredLoans = (from l in newLoans
-                                 where l.annualInc >= 59900 &&
+                                 where l.annualInc >= accountToUse.minimumAnnualIncome &&
                                  (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
                                  (l.inqLast6Mths == 0) &&
-                                 (l.intRate >= 10.0) &&
+                                 (l.pubRec == 0) &&
+                                 (l.intRate >= accountToUse.minimumInterestRate) &&
+                                 (l.revolBal <= accountToUse.maximumRevolvingBalance) &&
                                  //(l.intRate <= 18.0) &&
                                  (l.term == 36) &&
                                  (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
@@ -254,13 +256,16 @@ namespace LendingClubAPI
             Account andrewTaxableAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary", andrewAuthorizationToken));
 
             andrewTaxableAccount.authorizationToken = andrewAuthorizationToken;
+            andrewTaxableAccount.minimumInterestRate = 10.0;
             andrewTaxableAccount.statePercentLimit = 0.05;
             andrewTaxableAccount.amountToInvestPerLoan = 25.0;
+            andrewTaxableAccount.minimumAnnualIncome = 59900;
+            andrewTaxableAccount.maximumRevolvingBalance = 9999999;
             andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
             andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
             andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
-            andrewTaxableAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewTaxableAccount.notesFromCSVFilePath, andrewTaxableAccount.statePercentLimit, andrewTaxableAccount.accountTotal);
-            andrewTaxableAccount.numberOfLoansToInvestIn = (int)(andrewTaxableAccount.availableCash / andrewTaxableAccount.amountToInvestPerLoan);
+            //andrewTaxableAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewTaxableAccount.notesFromCSVFilePath, andrewTaxableAccount.statePercentLimit, andrewTaxableAccount.accountTotal);
+            //andrewTaxableAccount.numberOfLoansToInvestIn = (int)(andrewTaxableAccount.availableCash / andrewTaxableAccount.amountToInvestPerLoan);
             andrewTaxableAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/detailednotes";
             andrewTaxableAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/summary";
             andrewTaxableAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/orders";
@@ -292,18 +297,21 @@ namespace LendingClubAPI
 
             //activeAccounts.Add(andrewRothAccount);
 
-            const string dadRothAuthorizationTokenFilePath = @"C:\dadRothAuthorizationToken.txt";
+            const string dadRothAuthorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
 
-            Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/?????/summary", dadRothAuthorizationToken));
+            Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/77100250/summary", dadRothAuthorizationToken));
 
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
             dadRothAccount.amountToInvestPerLoan = 75.0;
-            dadRothAccount.loanGradesAllowed = new string[] { "A", "B"};
-            dadRothAccount.authorizationTokenFilePath = @"C:\dadRothAuthorizationToken.txt";
-            dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
-            dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
+            dadRothAccount.minimumInterestRate = 6.5;
+            dadRothAccount.minimumAnnualIncome = 42000;
+            dadRothAccount.maximumRevolvingBalance = 15000;
+            dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
+            dadRothAccount.authorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
+            //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
+            //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
             dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";

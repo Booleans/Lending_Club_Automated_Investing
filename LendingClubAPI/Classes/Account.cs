@@ -32,6 +32,8 @@ namespace LendingClubAPI
         public string accountSummaryUrl { get; set; }
         public string submitOrderUrl { get; set; }
         public NotesOwned notesOwnedByAccount { get; set; }
-
+        public double minimumInterestRate { get; set; }
+        public int minimumAnnualIncome { get; set; }
+        public double maximumRevolvingBalance { get; set; }
     }
 }
