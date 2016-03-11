@@ -281,6 +281,7 @@ namespace LendingClubAPI
             andrewTaxableAccount.amountToInvestPerLoan = 25.0;
             andrewTaxableAccount.minimumAnnualIncome = 59900;
             andrewTaxableAccount.maximumRevolvingBalance = 9999999;
+            andrewTaxableAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN", "RENT"};
             andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
             andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
             //andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
@@ -330,6 +331,7 @@ namespace LendingClubAPI
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maximumRevolvingBalance = 15000;
+            dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
             dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
