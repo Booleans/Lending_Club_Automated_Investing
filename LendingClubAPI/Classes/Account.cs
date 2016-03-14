@@ -37,5 +37,6 @@ namespace LendingClubAPI
         public double maximumRevolvingBalance { get; set; }
         public string[] allowedHomeOwnership { get; set; }
         public string accountTitle { get; set; }
+        public int[] loanTermsAllowed { get; set; }
     }
 }

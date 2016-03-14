@@ -47,7 +47,7 @@ namespace LendingClubAPI
                 Console.WriteLine("Searching for loans for the following account: {0}", investableAccount.accountTitle);
                 Console.WriteLine("Amount of cash currently available: ${0}", investableAccount.availableCash);
 
-                while (stopwatch.ElapsedMilliseconds < 60000 && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
+                while (stopwatch.ElapsedMilliseconds < 120000 && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
                 {
                     // If this is the first time retrieving listed loans, retrieve all.
                     // Retrieve only new loans for subsequent loops. 
@@ -112,7 +112,7 @@ namespace LendingClubAPI
             });
 
             Console.WriteLine("Execution has completed");
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
         public static string RetrieveJsonString(string myURL, string authorizationToken)
@@ -162,7 +162,7 @@ namespace LendingClubAPI
                                  (l.pubRec == 0) &&
                                  (l.intRate >= accountToUse.minimumInterestRate) &&
                                  //(l.intRate <= 18.0) &&
-                                 (l.term == 36) &&
+                                 (accountToUse.loanTermsAllowed.Contains(l.term)) &&
                                  (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
                                  //(l.loanAmount <= 1.1*l.revolBal) &&
@@ -280,7 +280,8 @@ namespace LendingClubAPI
             andrewTaxableAccount.statePercentLimit = 0.05;
             andrewTaxableAccount.amountToInvestPerLoan = 25.0;
             andrewTaxableAccount.minimumAnnualIncome = 59900;
-            andrewTaxableAccount.maximumRevolvingBalance = 9999999;
+            andrewTaxableAccount.maximumRevolvingBalance = 999999;
+            andrewTaxableAccount.loanTermsAllowed = new int[] {36};
             andrewTaxableAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN", "RENT"};
             andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
             andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
@@ -319,7 +320,7 @@ namespace LendingClubAPI
 
             //activeAccounts.Add(andrewRothAccount);
 
-            const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
+            const string dadRothAuthorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
 
             Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/77100250/summary", dadRothAuthorizationToken));
@@ -331,9 +332,10 @@ namespace LendingClubAPI
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maximumRevolvingBalance = 15000;
+            dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
-            dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
+            dadRothAccount.authorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             dadRothAccount.allowedStates = stateAbbreviations;
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
