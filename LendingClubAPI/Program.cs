@@ -165,6 +165,7 @@ namespace LendingClubAPI
                                  (accountToUse.loanTermsAllowed.Contains(l.term)) &&
                                  (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
+                                 (l.delinq2Yrs == null || l.delinq2Yrs == 0) &&
                                  //(l.loanAmount <= 1.1*l.revolBal) &&
                                  //(l.loanAmount >= .9*l.revolBal) &&
                                  (accountToUse.allowedHomeOwnership.Contains(l.homeOwnership)) &&
@@ -268,35 +269,35 @@ namespace LendingClubAPI
             // Find the directory of the project so we can use a relative path to the authorization token file. 
             string projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
-            const string andrewAuthorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
-            var andrewAuthorizationToken = File.ReadAllText(andrewAuthorizationTokenFilePath);
+            //const string andrewAuthorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
+            //var andrewAuthorizationToken = File.ReadAllText(andrewAuthorizationTokenFilePath);
 
-            // Store the Account object to get balance and outstanding principal.
-            Account andrewTaxableAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary", andrewAuthorizationToken));
+            //// Store the Account object to get balance and outstanding principal.
+            //Account andrewTaxableAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/1302864/summary", andrewAuthorizationToken));
 
-            andrewTaxableAccount.accountTitle = "Andrew's Taxable Account";
-            andrewTaxableAccount.authorizationToken = andrewAuthorizationToken;
-            andrewTaxableAccount.minimumInterestRate = 10.0;
-            andrewTaxableAccount.statePercentLimit = 0.05;
-            andrewTaxableAccount.amountToInvestPerLoan = 25.0;
-            andrewTaxableAccount.minimumAnnualIncome = 59900;
-            andrewTaxableAccount.maximumRevolvingBalance = 999999;
-            andrewTaxableAccount.loanTermsAllowed = new int[] {36};
-            andrewTaxableAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN", "RENT"};
-            andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
-            andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
-            //andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
-            andrewTaxableAccount.allowedStates = stateAbbreviations;
-            //andrewTaxableAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewTaxableAccount.notesFromCSVFilePath, andrewTaxableAccount.statePercentLimit, andrewTaxableAccount.accountTotal);
-            //andrewTaxableAccount.numberOfLoansToInvestIn = (int)(andrewTaxableAccount.availableCash / andrewTaxableAccount.amountToInvestPerLoan);
-            andrewTaxableAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/detailednotes";
-            andrewTaxableAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/summary";
-            andrewTaxableAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/orders";
-            andrewTaxableAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewTaxableAccount.detailedNotesOwnedUrl, andrewTaxableAccount.authorizationToken));
-            andrewTaxableAccount.loanIDsOwned = (from loan in andrewTaxableAccount.notesOwnedByAccount.myNotes.AsEnumerable()
-                                                 select loan.loanId).ToList();
+            //andrewTaxableAccount.accountTitle = "Andrew's Taxable Account";
+            //andrewTaxableAccount.authorizationToken = andrewAuthorizationToken;
+            //andrewTaxableAccount.minimumInterestRate = 10.0;
+            //andrewTaxableAccount.statePercentLimit = 0.05;
+            //andrewTaxableAccount.amountToInvestPerLoan = 25.0;
+            //andrewTaxableAccount.minimumAnnualIncome = 59900;
+            //andrewTaxableAccount.maximumRevolvingBalance = 999999;
+            //andrewTaxableAccount.loanTermsAllowed = new int[] {36};
+            //andrewTaxableAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN", "RENT"};
+            //andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
+            //andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
+            ////andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
+            //andrewTaxableAccount.allowedStates = stateAbbreviations;
+            ////andrewTaxableAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewTaxableAccount.notesFromCSVFilePath, andrewTaxableAccount.statePercentLimit, andrewTaxableAccount.accountTotal);
+            ////andrewTaxableAccount.numberOfLoansToInvestIn = (int)(andrewTaxableAccount.availableCash / andrewTaxableAccount.amountToInvestPerLoan);
+            //andrewTaxableAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/detailednotes";
+            //andrewTaxableAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/summary";
+            //andrewTaxableAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + andrewTaxableAccount.investorID + "/orders";
+            //andrewTaxableAccount.notesOwnedByAccount = GetLoansOwnedFromJson(RetrieveJsonString(andrewTaxableAccount.detailedNotesOwnedUrl, andrewTaxableAccount.authorizationToken));
+            //andrewTaxableAccount.loanIDsOwned = (from loan in andrewTaxableAccount.notesOwnedByAccount.myNotes.AsEnumerable()
+            //                                     select loan.loanId).ToList();
 
-            activeAccounts.Add(andrewTaxableAccount);
+            //activeAccounts.Add(andrewTaxableAccount);
 
             //const string andrewRothAuthorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
             //var andrewRothAuthorizationToken = File.ReadAllText(andrewRothAuthorizationTokenFilePath);
@@ -320,7 +321,7 @@ namespace LendingClubAPI
 
             //activeAccounts.Add(andrewRothAccount);
 
-            const string dadRothAuthorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
+            const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
 
             Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/77100250/summary", dadRothAuthorizationToken));
@@ -335,7 +336,7 @@ namespace LendingClubAPI
             dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
-            dadRothAccount.authorizationTokenFilePath = @"F:\DadRothAuthorizationToken.txt";
+            dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             dadRothAccount.allowedStates = stateAbbreviations;
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
