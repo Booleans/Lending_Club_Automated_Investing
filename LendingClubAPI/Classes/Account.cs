@@ -38,5 +38,6 @@ namespace LendingClubAPI
         public string[] allowedHomeOwnership { get; set; }
         public string accountTitle { get; set; }
         public int[] loanTermsAllowed { get; set; }
+        public int maxInqLast6Months { get; set; }
     }
 }

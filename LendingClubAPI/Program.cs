@@ -97,7 +97,7 @@ namespace LendingClubAPI
                     {
                         foreach (var loan in loansPurchased)
                         {
-                            Console.WriteLine("The account {0} purchased loan ID: {1} at {2}", investableAccount.accountTitle, loan, DateTime.Now.ToShortTimeString());
+                            Console.WriteLine("The account {0} purchased loan ID: {1} at {2}", investableAccount.accountTitle, loan, DateTime.Now.ToLongTimeString());
                         } 
                     }
 
@@ -158,7 +158,7 @@ namespace LendingClubAPI
             var filteredLoans = (from l in newLoans
                                  where l.annualInc >= accountToUse.minimumAnnualIncome &&
                                  (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                 (l.inqLast6Mths == 0) &&
+                                 (l.inqLast6Mths == accountToUse.maxInqLast6Months) &&
                                  (l.pubRec == 0) &&
                                  (l.intRate >= accountToUse.minimumInterestRate) &&
                                  //(l.intRate <= 18.0) &&
@@ -263,7 +263,7 @@ namespace LendingClubAPI
 
         public static List<Account> InstantiateAccounts()
         {
-            // Need a list of active accounts if we are going to be running this code on multiple accounts.
+            // Need to crate a list of active accounts if we are going to be running this code on multiple accounts.
             List<Account> activeAccounts = new List<Account>();
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
@@ -282,10 +282,10 @@ namespace LendingClubAPI
             //andrewTaxableAccount.amountToInvestPerLoan = 25.0;
             //andrewTaxableAccount.minimumAnnualIncome = 59900;
             //andrewTaxableAccount.maximumRevolvingBalance = 999999;
-            //andrewTaxableAccount.loanTermsAllowed = new int[] {36};
-            //andrewTaxableAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN", "RENT"};
+            //andrewTaxableAccount.maxInqLast6Months = 0;
+            //andrewTaxableAccount.loanTermsAllowed = new int[] { 36 };
+            //andrewTaxableAccount.allowedHomeOwnership = new string[] { "MORTGAGE", "OWN", "RENT" };
             //andrewTaxableAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
-            //andrewTaxableAccount.authorizationTokenFilePath = @"C:\AndrewAuthorizationToken.txt";
             ////andrewTaxableAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
             //andrewTaxableAccount.allowedStates = stateAbbreviations;
             ////andrewTaxableAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewTaxableAccount.notesFromCSVFilePath, andrewTaxableAccount.statePercentLimit, andrewTaxableAccount.accountTotal);
@@ -308,7 +308,6 @@ namespace LendingClubAPI
             //andrewRothAccount.statePercentLimit = 0.05;
             //andrewRothAccount.amountToInvestPerLoan = 25.0;
             //andrewRothAccount.loanGradesAllowed = new string[] { "B", "C", "D" };
-            //andrewRothAccount.authorizationTokenFilePath = @"C:\AndrewRothAuthorizationToken.txt";
             //andrewRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             //andrewRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(andrewRothAccount.notesFromCSVFilePath, andrewRothAccount.statePercentLimit, andrewRothAccount.accountTotal);
             //andrewRothAccount.numberOfLoansToInvestIn = (int)(andrewRothAccount.availableCash / andrewRothAccount.amountToInvestPerLoan);
@@ -332,11 +331,11 @@ namespace LendingClubAPI
             dadRothAccount.amountToInvestPerLoan = 75.0;
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
-            dadRothAccount.maximumRevolvingBalance = 15000;
+            dadRothAccount.maxInqLast6Months = 0;
+            //dadRothAccount.maximumRevolvingBalance = 15000;
             dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
-            dadRothAccount.authorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
             dadRothAccount.allowedStates = stateAbbreviations;
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
