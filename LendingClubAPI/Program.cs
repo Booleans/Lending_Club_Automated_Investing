@@ -25,6 +25,14 @@ namespace LendingClubAPI
                                  "OK","OR","PA","RI","SC",
                                  "SD","TN","TX","UT","VA",
                                  "VT","WA","WI","WV","WY"};
+        public static string[] allPossibleLoanGrades =  {"A", "B", "C", "D", "E", "F", "G"};
+        public static int[] allLoanTerms = {36, 60};
+        public static string[] allHomeOwnership = {"RENT", "OWN", "MORTGAGE", "OTHER"};
+        public static string[] allLoanPurposes =
+        {
+            "debt_consolidation", "medical","home_improvement", "renewable_energy", "small_business",
+            "wedding", "vacation", "moving", "house", "car", "major_purchase", "credit_card", "other"
+        };
 
         private static void Main(string[] args)
         {
@@ -158,17 +166,17 @@ namespace LendingClubAPI
             var filteredLoans = (from l in newLoans
                                  where 
                                  (l.annualInc >= (accountToUse.minimumAnnualIncome ?? 0)) &&
-                                 (accountToUse.loanPurposesAllowed.Contains(l.purpose)) &&
+                                 ((accountToUse.loanPurposesAllowed ?? allLoanPurposes).Contains(l.purpose)) &&
                                  (l.inqLast6Mths == (accountToUse.maxInqLast6Months ?? 99)) &&
                                  (l.pubRec <= (accountToUse.maxPublicRecordsAllowed ?? 0)) &&
                                  (l.intRate >= (accountToUse.minimumInterestRate ?? 0)) &&
                                  (l.intRate <= (accountToUse.maximumInterestRate ?? 99)) &&
-                                 (accountToUse.loanTermsAllowed.Contains(l.term)) &&
-                                 (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
+                                 ((accountToUse.loanTermsAllowed ?? allLoanTerms).Contains(l.term)) &&
+                                 ((accountToUse.loanGradesAllowed ?? allPossibleLoanGrades).Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
                                  (l.revolBal <= (accountToUse.maximumRevolvingBalance ?? 999999)) &&
                                  (l.delinq2Yrs == null || l.delinq2Yrs == 0) &&
-                                 (accountToUse.allowedHomeOwnership.Contains(l.homeOwnership)) &&
+                                 ((accountToUse.allowedHomeOwnership ?? allHomeOwnership).Contains(l.homeOwnership)) &&
                                  ((accountToUse.allowedStates ?? stateAbbreviations).Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
                                  orderby l.intRate descending                                                            
