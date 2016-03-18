@@ -156,15 +156,17 @@ namespace LendingClubAPI
         {
 
             var filteredLoans = (from l in newLoans
-                                 where l.annualInc >= accountToUse.minimumAnnualIncome &&
-                                 (l.purpose == "debt_consolidation" || l.purpose == "credit_card") &&
-                                 (l.inqLast6Mths == accountToUse.maxInqLast6Months) &&
-                                 (l.pubRec == 0) &&
-                                 (l.intRate >= accountToUse.minimumInterestRate) &&
-                                 //(l.intRate <= 18.0) &&
+                                 where 
+                                 (l.annualInc >= (accountToUse.minimumAnnualIncome ?? 0)) &&
+                                 (accountToUse.loanPurposesAllowed.Contains(l.purpose)) &&
+                                 (l.inqLast6Mths == (accountToUse.maxInqLast6Months ?? 99)) &&
+                                 (l.pubRec <= (accountToUse.maxPublicRecordsAllowed ?? 0)) &&
+                                 (l.intRate >= (accountToUse.minimumInterestRate ?? 0)) &&
+                                 (l.intRate <= (accountToUse.maximumInterestRate ?? 99)) &&
                                  (accountToUse.loanTermsAllowed.Contains(l.term)) &&
                                  (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
+                                 (l.revolBal <= (accountToUse.maximumRevolvingBalance ?? 999999)) &&
                                  (l.delinq2Yrs == null || l.delinq2Yrs == 0) &&
                                  //(l.loanAmount <= 1.1*l.revolBal) &&
                                  //(l.loanAmount >= .9*l.revolBal) &&
@@ -332,6 +334,7 @@ namespace LendingClubAPI
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maxInqLast6Months = 0;
+            dadRothAccount.loanPurposesAllowed = new string[] {"debt_consolidation", "credit_card"};
             //dadRothAccount.maximumRevolvingBalance = 15000;
             dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};

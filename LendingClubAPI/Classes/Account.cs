@@ -32,12 +32,15 @@ namespace LendingClubAPI
         public string accountSummaryUrl { get; set; }
         public string submitOrderUrl { get; set; }
         public NotesOwned notesOwnedByAccount { get; set; }
-        public double minimumInterestRate { get; set; }
-        public int minimumAnnualIncome { get; set; }
-        public double maximumRevolvingBalance { get; set; }
+        public double? minimumInterestRate { get; set; }
+        public double? maximumInterestRate { get; set; }
+        public int? minimumAnnualIncome { get; set; }
+        public double? maximumRevolvingBalance { get; set; }
         public string[] allowedHomeOwnership { get; set; }
         public string accountTitle { get; set; }
         public int[] loanTermsAllowed { get; set; }
-        public int maxInqLast6Months { get; set; }
+        public int? maxInqLast6Months { get; set; }
+        public int? maxPublicRecordsAllowed { get; set; }
+        public string[] loanPurposesAllowed { get; set; }
     }
 }
