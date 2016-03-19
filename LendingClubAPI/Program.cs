@@ -167,13 +167,14 @@ namespace LendingClubAPI
                                  where 
                                  (l.annualInc >= (accountToUse.minimumAnnualIncome ?? 0)) &&
                                  ((accountToUse.loanPurposesAllowed ?? allLoanPurposes).Contains(l.purpose)) &&
-                                 (l.inqLast6Mths == (accountToUse.maxInqLast6Months ?? 99)) &&
+                                 (l.inqLast6Mths <= (accountToUse.maxInqLast6Months ?? 99)) &&
                                  (l.pubRec <= (accountToUse.maxPublicRecordsAllowed ?? 0)) &&
                                  (l.intRate >= (accountToUse.minimumInterestRate ?? 0)) &&
                                  (l.intRate <= (accountToUse.maximumInterestRate ?? 99)) &&
                                  ((accountToUse.loanTermsAllowed ?? allLoanTerms).Contains(l.term)) &&
                                  ((accountToUse.loanGradesAllowed ?? allPossibleLoanGrades).Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
+                                 (l.empLength != null) &&
                                  (l.revolBal <= (accountToUse.maximumRevolvingBalance ?? 999999)) &&
                                  (l.delinq2Yrs == null || l.delinq2Yrs == 0) &&
                                  ((accountToUse.allowedHomeOwnership ?? allHomeOwnership).Contains(l.homeOwnership)) &&
