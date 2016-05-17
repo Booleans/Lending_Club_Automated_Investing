@@ -338,7 +338,7 @@ namespace LendingClubAPI
             dadRothAccount.accountTitle = "Dad's Roth Account";
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
-            dadRothAccount.amountToInvestPerLoan = 75.0;
+            dadRothAccount.amountToInvestPerLoan = 50.0;
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maxInqLast6Months = 0;
