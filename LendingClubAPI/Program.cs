@@ -169,6 +169,7 @@ namespace LendingClubAPI
                                  ((accountToUse.loanPurposesAllowed ?? allLoanPurposes).Contains(l.purpose)) &&
                                  (l.inqLast6Mths <= (accountToUse.maxInqLast6Months ?? 99)) &&
                                  (l.pubRec <= (accountToUse.maxPublicRecordsAllowed ?? 0)) &&
+                                 (l.collections12MthsExMed == 0 || l.collections12MthsExMed == null) &&
                                  (l.intRate >= (accountToUse.minimumInterestRate ?? 0)) &&
                                  (l.intRate <= (accountToUse.maximumInterestRate ?? 99)) &&
                                  ((accountToUse.loanTermsAllowed ?? allLoanTerms).Contains(l.term)) &&
