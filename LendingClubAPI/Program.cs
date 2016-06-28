@@ -287,7 +287,7 @@ namespace LendingClubAPI
             dadRothAccount.accountTitle = "Dad's Roth Account";
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
-            dadRothAccount.amountToInvestPerLoan = 25.0;
+            dadRothAccount.amountToInvestPerLoan = 50.0;
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maxInqLast6Months = 0;
@@ -296,9 +296,9 @@ namespace LendingClubAPI
             dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
-            //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\Roth_notes_ext.csv";
-            //dadRothAccount.allowedStates = stateAbbreviations;
-            //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
+            dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
+            dadRothAccount.allowedStates = stateAbbreviations;
+            dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
             dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";
