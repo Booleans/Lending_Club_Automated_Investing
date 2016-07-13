@@ -14,6 +14,7 @@ namespace LendingClubAPI
     internal class Program
     {
         public static string latestLoansUrl;
+        // We need default values for the loan selection theory. If a property is not explicitly set for an account the code will use these defaults.
         public static string[] stateAbbreviations = new string[] {
                                  "AK","AL","AR","AZ","CA",
                                  "CO","CT","DE","FL","GA",
@@ -38,10 +39,12 @@ namespace LendingClubAPI
         {
             var activeAccounts = InstantiateAccounts();
 
-            // Use a stopwatch to terminate code after a certain duration.
+            // Stopwatch is necessary to terminate code if new loans are not found after a set time period.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+            var millisecondsUntilTermination = 120000;
 
+            // Multiple accounts can access the API so we might as well run them in parallel instead of waiting for one account after the other.
             Parallel.ForEach(activeAccounts, investableAccount =>
             {
                 // We only need to search for loans if the available balance >= minimum investment amount. 
@@ -55,9 +58,9 @@ namespace LendingClubAPI
                 Console.WriteLine("Searching for loans for the following account: {0}", investableAccount.accountTitle);
                 Console.WriteLine("Amount of cash currently available: ${0}", investableAccount.availableCash);
 
-                while (stopwatch.ElapsedMilliseconds < 120000 && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
+                while (stopwatch.ElapsedMilliseconds < millisecondsUntilTermination && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
                 {
-                    // If this is the first time retrieving listed loans, retrieve all.
+                    // If this is the first time retrieving latest listed loans, retrieve all.
                     // Retrieve only new loans for subsequent loops. 
                     if (investableAccount.getAllLoans)
                     {
@@ -69,26 +72,25 @@ namespace LendingClubAPI
                         latestLoansUrl = "https://api.lendingclub.com/api/investor/v1/loans/listing?showAll=false";
                     }
 
-                    // Retrieve the latest offering of loans on the platform.
                     NewLoans latestListedLoans = GetNewLoansFromJson(RetrieveJsonString(latestLoansUrl, investableAccount.authorizationToken));
 
+                    // If there are no newly listed loans then we do not need to continue and filter them.
                     if (latestListedLoans.loans == null)
                     {
                         continue;
                     }
 
-                    // Filter the new loans based off of my criteria. 
+                    // We need to filter the new loans to see which ones pass the account's screening criteria. 
                     var filteredLoans = FilterNewLoans(latestListedLoans.loans, investableAccount);
 
-                    // We only need to build an order if filteredLoan is not null.
+                    // There's no need to move on to building an order if there were no loans that passed the screening filter.
                     if (!filteredLoans.Any())
                     {
-                        // Wait one second before retrieving loans again if there are no loans passing the filter. 
+                        // Lending Club limited the API to one request per second so we need a delay before trying again to find new loans.
                         Thread.Sleep(1000);
                         continue;
                     }
-
-                    // Create a new order to purchase the filtered loans. 
+ 
                     Order order = BuildOrder(filteredLoans, investableAccount.amountToInvestPerLoan, investableAccount.investorID);
 
                     string output = JsonConvert.SerializeObject(order);
@@ -97,10 +99,12 @@ namespace LendingClubAPI
 
                     var orderConfirmations = orderResponse.orderConfirmations.AsEnumerable();
 
+                    // Collecting the loan IDs of purchased loans so we can prevent them from being invested in again on the next iteration of the loop.
                     var loansPurchased = (from confirmation in orderConfirmations
                                           where confirmation.investedAmount >= 0
                                           select confirmation.loanId);
 
+                    // We want to notify the user of any loans were successfully purchased. 
                     if (loansPurchased.Any())
                     {
                         foreach (var loan in loansPurchased)
@@ -108,19 +112,15 @@ namespace LendingClubAPI
                             Console.WriteLine("The account {0} purchased loan ID: {1} at {2}", investableAccount.accountTitle, loan, DateTime.Now.ToLongTimeString());
                         } 
                     }
-
-
-                    // Add purchased loans to the list of loan IDs owned. 
+ 
+                    // Updating the account to avoid purchasing loans that have already been purchased. 
                     investableAccount.loanIDsOwned.AddRange(loansPurchased);
 
-                    // Subtract successfully invested loans from account balance.
+                    // Update the amount of available cash. Loop will then terminate if the available cash is less than the amount needed to invest in a loan.
                     investableAccount.availableCash -= loansPurchased.Count() * investableAccount.amountToInvestPerLoan;
                 }
 
             });
-
-            Console.WriteLine("Execution has completed");
-            //Console.ReadLine();
         }
 
         public static string RetrieveJsonString(string myURL, string authorizationToken)
@@ -141,7 +141,7 @@ namespace LendingClubAPI
 
         }
 
-        // Method to convert JSON into account balance.
+        // Need to parse the API response to get the details of the account. This will inform us of the amount of cash available to invest. 
         public static Account GetAccountFromJson(string inputJson)
         {
             Account accountDetails = JsonConvert.DeserializeObject<Account>(inputJson);
@@ -154,12 +154,14 @@ namespace LendingClubAPI
             return notesOwned;
         }
 
+        // Need to parse the API response to figure out which loans are newly listed.
         public static NewLoans GetNewLoansFromJson(string inputJson)
         {
             NewLoans newLoans = JsonConvert.DeserializeObject<NewLoans>(inputJson);
             return newLoans;
         }
 
+        // Not all users want to invest in every possible loan. Filtering allows each account to use unique criteria. 
         public static IEnumerable<Loan> FilterNewLoans(List<Loan> newLoans, Account accountToUse)
         {
 
@@ -181,6 +183,7 @@ namespace LendingClubAPI
                                  ((accountToUse.allowedHomeOwnership ?? allHomeOwnership).Contains(l.homeOwnership)) &&
                                  ((accountToUse.allowedStates ?? stateAbbreviations).Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
+                                 // Users want to select the highest interest rate possible from the loans that match their criteria. 
                                  orderby l.intRate descending                                                            
                                  select l).Take(accountToUse.numberOfLoansToInvestIn);
             
@@ -234,13 +237,14 @@ namespace LendingClubAPI
 
         public static string[] CalculateAndSetAllowedStatesFromCsv(string CSVInputpath, double statePercentLimit, double totalAccountValue)
         {
+            // Method is necessary to prevent geographic risk. Without it each account will be loaded with loans from California, Texas, New York, and Florida.
             string allowedStatesFromCSV = File.ReadAllText(CSVInputpath);
             char[] delimiters = new char[] { '\r', '\n' };
             string[] allowedStates = allowedStatesFromCSV.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
             Dictionary<string, double> states = stateAbbreviations.ToDictionary(state => state, state => 0.0);
 
-            // Skip the first line because it contains the row headings. 
+            // First line needs to be skipped because it contains column headings.  
             foreach (string note in allowedStates.Skip(1))
             {
               
@@ -248,17 +252,18 @@ namespace LendingClubAPI
 
                 var noteDetails = note.Split(',');
 
-                // We need to make sure we are only using loans that are current. 
+                // Only loans that are current are relevant for calculating total outstanding principal invested.
+                // Any loan not current is considered a complete loss of remaining principal balance. 
                 bool isNoteCurrent = noteDetails.Any(detail => detail == "Current");
 
-                // If the note is not current then skip to the next iteration of the foreach loop. 
                 if (!isNoteCurrent) continue;
 
+                // We are calculating principal outstanding in each state so we need to determine which state this loan was issued in.
                 string stateOfNote = noteDetails.First(detail => stateAbbreviations.Contains(detail));
 
                 principalRemainingOfNote = Double.Parse(noteDetails[10]);
 
-                // Increase the principal value in that state.
+                // Need to keep track of total principal outstanding in each state in order to filter later on.
                 states[stateOfNote] += Math.Round(principalRemainingOfNote, 2);
             }
 
