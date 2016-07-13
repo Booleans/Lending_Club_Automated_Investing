@@ -14,7 +14,7 @@ namespace LendingClubAPI
     internal class Program
     {
         public static string latestLoansUrl;
-        // We need default values for the loan selection theory. If a property is not explicitly set for an account the code will use these defaults.
+        // We need default values for the loan selection criteria. If a property is not explicitly set for an account the code will use these defaults.
         public static string[] stateAbbreviations = new string[] {
                                  "AK","AL","AR","AZ","CA",
                                  "CO","CT","DE","FL","GA",
