@@ -14,26 +14,6 @@ namespace LendingClubAPI
     internal class Program
     {
         public static string latestLoansUrl;
-        // We need default values for the loan selection criteria. If a property is not explicitly set for an account the code will use these defaults.
-        public static string[] stateAbbreviations = new string[] {
-                                 "AK","AL","AR","AZ","CA",
-                                 "CO","CT","DE","FL","GA",
-                                 "HI","IA","ID","IL","IN",
-                                 "KS","KY","LA","MA","MD",
-                                 "ME","MI","MN","MO","MS",
-                                 "MT","NC","ND","NE","NH",
-                                 "NJ","NM","NV","NY","OH",
-                                 "OK","OR","PA","RI","SC",
-                                 "SD","TN","TX","UT","VA",
-                                 "VT","WA","WI","WV","WY"};
-        public static string[] allPossibleLoanGrades =  {"A", "B", "C", "D", "E", "F", "G"};
-        public static int[] allLoanTerms = {36, 60};
-        public static string[] allHomeOwnership = {"RENT", "OWN", "MORTGAGE", "OTHER"};
-        public static string[] allLoanPurposes =
-        {
-            "debt_consolidation", "medical","home_improvement", "renewable_energy", "small_business",
-            "wedding", "vacation", "moving", "house", "car", "major_purchase", "credit_card", "other"
-        };
 
         private static void Main(string[] args)
         {
@@ -167,21 +147,21 @@ namespace LendingClubAPI
 
             var filteredLoans = (from l in newLoans
                                  where 
-                                 (l.annualInc >= (accountToUse.minimumAnnualIncome ?? 0)) &&
-                                 ((accountToUse.loanPurposesAllowed ?? allLoanPurposes).Contains(l.purpose)) &&
-                                 (l.inqLast6Mths <= (accountToUse.maxInqLast6Months ?? 99)) &&
-                                 (l.pubRec <= (accountToUse.maxPublicRecordsAllowed ?? 0)) &&
+                                 (l.annualInc >= accountToUse.minimumAnnualIncome) &&
+                                 ((accountToUse.loanPurposesAllowed).Contains(l.purpose)) &&
+                                 (l.inqLast6Mths <= accountToUse.maxInqLast6Months) &&
+                                 (l.pubRec <= accountToUse.maxPublicRecordsAllowed) &&
                                  (l.collections12MthsExMed == 0 || l.collections12MthsExMed == null) &&
                                  (l.intRate >= (accountToUse.minimumInterestRate ?? 0)) &&
                                  (l.intRate <= (accountToUse.maximumInterestRate ?? 99)) &&
-                                 ((accountToUse.loanTermsAllowed ?? allLoanTerms).Contains(l.term)) &&
-                                 ((accountToUse.loanGradesAllowed ?? allPossibleLoanGrades).Contains(l.grade)) &&
+                                 ((accountToUse.loanTermsAllowed).Contains(l.term)) &&
+                                 ((accountToUse.loanGradesAllowed).Contains(l.grade)) &&
                                  (l.mthsSinceLastDelinq == null) &&
                                  (l.empLength != null) &&
-                                 (l.revolBal <= (accountToUse.maximumRevolvingBalance ?? 999999)) &&
+                                 (l.revolBal <= accountToUse.maximumRevolvingBalance) &&
                                  (l.delinq2Yrs == null || l.delinq2Yrs == 0) &&
-                                 ((accountToUse.allowedHomeOwnership ?? allHomeOwnership).Contains(l.homeOwnership)) &&
-                                 ((accountToUse.allowedStates ?? stateAbbreviations).Contains(l.addrState)) &&
+                                 ((accountToUse.allowedHomeOwnership).Contains(l.homeOwnership)) &&
+                                 ((accountToUse.allowedStates).Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
                                  // Users want to select the highest interest rate possible from the loans that match their criteria. 
                                  orderby l.intRate descending                                                            
@@ -242,7 +222,20 @@ namespace LendingClubAPI
             char[] delimiters = new char[] { '\r', '\n' };
             string[] allowedStates = allowedStatesFromCSV.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
-            Dictionary<string, double> states = stateAbbreviations.ToDictionary(state => state, state => 0.0);
+            string[] allStates =
+            {
+                "AK", "AL", "AR", "AZ", "CA",
+                "CO", "CT", "DE", "FL", "GA",
+                "HI", "IA", "ID", "IL", "IN",
+                "KS", "KY", "LA", "MA", "MD",
+                "ME", "MI", "MN", "MO", "MS",
+                "MT", "NC", "ND", "NE", "NH",
+                "NJ", "NM", "NV", "NY", "OH",
+                "OK", "OR", "PA", "RI", "SC",
+                "SD", "TN", "TX", "UT", "VA",
+                "VT", "WA", "WI", "WV", "WY"
+            };
+            Dictionary<string, double> states = allStates.ToDictionary(state => state, state => 0.0);
 
             // First line needs to be skipped because it contains column headings.  
             foreach (string note in allowedStates.Skip(1))
@@ -259,7 +252,7 @@ namespace LendingClubAPI
                 if (!isNoteCurrent) continue;
 
                 // We are calculating principal outstanding in each state so we need to determine which state this loan was issued in.
-                string stateOfNote = noteDetails.First(detail => stateAbbreviations.Contains(detail));
+                string stateOfNote = noteDetails.First(detail => allStates.Contains(detail));
 
                 principalRemainingOfNote = Double.Parse(noteDetails[10]);
 
@@ -292,7 +285,7 @@ namespace LendingClubAPI
             dadRothAccount.accountTitle = "Dad's Roth Account";
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
-            dadRothAccount.amountToInvestPerLoan = 50.0;
+            dadRothAccount.amountToInvestPerLoan = 25.0;
             dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maxInqLast6Months = 0;
@@ -302,7 +295,6 @@ namespace LendingClubAPI
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
             dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
-            dadRothAccount.allowedStates = stateAbbreviations;
             dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";

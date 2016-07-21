@@ -23,24 +23,37 @@ namespace LendingClubAPI
         public string notesFromCSVFilePath { get; set; }
         public double amountToInvestPerLoan { get; set; }
         public string authorizationToken { get; set; }
-        public string[] loanGradesAllowed { get; set; }
+        public string[] loanGradesAllowed { get; set; } = { "A", "B", "C", "D", "E", "F", "G" };
         public bool getAllLoans { get; set; } = true;
         public List<int> loanIDsOwned { get; set; }
-        public string[] allowedStates { get; set; }
+        public string[] allowedStates { get; set; } = {
+                                 "AK","AL","AR","AZ","CA",
+                                 "CO","CT","DE","FL","GA",
+                                 "HI","IA","ID","IL","IN",
+                                 "KS","KY","LA","MA","MD",
+                                 "ME","MI","MN","MO","MS",
+                                 "MT","NC","ND","NE","NH",
+                                 "NJ","NM","NV","NY","OH",
+                                 "OK","OR","PA","RI","SC",
+                                 "SD","TN","TX","UT","VA",
+                                 "VT","WA","WI","WV","WY"};
         public int numberOfLoansToInvestIn { get; set; }
         public string detailedNotesOwnedUrl { get; set; }
         public string accountSummaryUrl { get; set; }
         public string submitOrderUrl { get; set; }
         public NotesOwned notesOwnedByAccount { get; set; }
-        public double? minimumInterestRate { get; set; }
-        public double? maximumInterestRate { get; set; }
-        public int? minimumAnnualIncome { get; set; }
-        public double? maximumRevolvingBalance { get; set; }
-        public string[] allowedHomeOwnership { get; set; }
+        public double? minimumInterestRate { get; set; } = 0.0;
+        public double? maximumInterestRate { get; set; } = 99.9;
+        public int? minimumAnnualIncome { get; set; } = 0;
+        public double? maximumRevolvingBalance { get; set; } = 999999;
+        public string[] allowedHomeOwnership { get; set; } = { "RENT", "OWN", "MORTGAGE", "OTHER" };
         public string accountTitle { get; set; }
-        public int[] loanTermsAllowed { get; set; }
-        public int? maxInqLast6Months { get; set; }
-        public int? maxPublicRecordsAllowed { get; set; }
-        public string[] loanPurposesAllowed { get; set; }
+        public int[] loanTermsAllowed { get; set; } = { 36, 60 };
+        public int? maxInqLast6Months { get; set; } = 99;
+        public int? maxPublicRecordsAllowed { get; set; } = 0;
+        public string[] loanPurposesAllowed { get; set; } =         {
+            "debt_consolidation", "medical","home_improvement", "renewable_energy", "small_business",
+            "wedding", "vacation", "moving", "house", "car", "major_purchase", "credit_card", "other"
+        };
     }
 }
