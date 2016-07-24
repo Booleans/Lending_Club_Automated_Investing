@@ -159,7 +159,7 @@ namespace LendingClubAPI
                                  (l.mthsSinceLastDelinq == null) &&
                                  (l.empLength != null) &&
                                  (l.revolBal <= accountToUse.maximumRevolvingBalance) &&
-                                 (l.delinq2Yrs == null || l.delinq2Yrs == 0) &&
+                                 (l.delinq2Yrs <= accountToUse.maxDelinqLast2Years) &&
                                  ((accountToUse.allowedHomeOwnership).Contains(l.homeOwnership)) &&
                                  ((accountToUse.allowedStates).Contains(l.addrState)) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
@@ -286,14 +286,12 @@ namespace LendingClubAPI
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
             dadRothAccount.amountToInvestPerLoan = 25.0;
-            dadRothAccount.minimumInterestRate = 6.5;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maxInqLast6Months = 0;
             dadRothAccount.loanPurposesAllowed = new string[] {"debt_consolidation", "credit_card"};
-            //dadRothAccount.maximumRevolvingBalance = 15000;
             dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
-            dadRothAccount.loanGradesAllowed = new string[] { "A", "B", "C"};
+            dadRothAccount.loanGradesAllowed = new string[] {"B", "C", "D"};
             dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
             dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);

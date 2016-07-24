@@ -21,7 +21,7 @@ namespace LendingClubAPI
         public double statePercentLimit { get; set; }
         public string authorizationTokenFilePath { get; set; }
         public string notesFromCSVFilePath { get; set; }
-        public double amountToInvestPerLoan { get; set; }
+        public double amountToInvestPerLoan { get; set; } = 25;
         public string authorizationToken { get; set; }
         public string[] loanGradesAllowed { get; set; } = { "A", "B", "C", "D", "E", "F", "G" };
         public bool getAllLoans { get; set; } = true;
@@ -55,5 +55,6 @@ namespace LendingClubAPI
             "debt_consolidation", "medical","home_improvement", "renewable_energy", "small_business",
             "wedding", "vacation", "moving", "house", "car", "major_purchase", "credit_card", "other"
         };
+        public int maxDelinqLast2Years { get; set; } = 0;
     }
 }
