@@ -22,7 +22,7 @@ namespace LendingClubAPI
             // Stopwatch is necessary to terminate code if new loans are not found after a set time period.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var millisecondsUntilTermination = 120000;
+            var millisecondsUntilTermination = 30000;
 
             // Multiple accounts can access the API so we might as well run them in parallel instead of waiting for one account after the other.
             Parallel.ForEach(activeAccounts, investableAccount =>
@@ -148,23 +148,22 @@ namespace LendingClubAPI
             var filteredLoans = (from l in newLoans
                                  where 
                                  (l.annualInc >= accountToUse.minimumAnnualIncome) &&
-                                 ((accountToUse.loanPurposesAllowed).Contains(l.purpose)) &&
+                                 (accountToUse.loanPurposesAllowed.Contains(l.purpose)) &&
                                  (l.inqLast6Mths <= accountToUse.maxInqLast6Months) &&
                                  (l.pubRec <= accountToUse.maxPublicRecordsAllowed) &&
                                  (l.collections12MthsExMed == 0 || l.collections12MthsExMed == null) &&
-                                 (l.intRate >= (accountToUse.minimumInterestRate ?? 0)) &&
-                                 (l.intRate <= (accountToUse.maximumInterestRate ?? 99)) &&
-                                 ((accountToUse.loanTermsAllowed).Contains(l.term)) &&
-                                 ((accountToUse.loanGradesAllowed).Contains(l.grade)) &&
-                                 (l.mthsSinceLastDelinq == null) &&
-                                 (l.empLength != null) &&
+                                 (l.intRate >= accountToUse.minimumInterestRate) &&
+                                 (l.intRate <= accountToUse.maximumInterestRate ) &&
+                                 (accountToUse.loanTermsAllowed.Contains(l.term)) &&
+                                 (accountToUse.loanGradesAllowed.Contains(l.grade)) &&
+                                 (l.mthsSinceLastDelinq == null) && // Do not loan money to people who have had a delinquency in the past. 
+                                 (l.empLength != null) && // Do not loan money to unemployed people. 
                                  (l.revolBal <= accountToUse.maximumRevolvingBalance) &&
                                  (l.delinq2Yrs <= accountToUse.maxDelinqLast2Years) &&
-                                 ((accountToUse.allowedHomeOwnership).Contains(l.homeOwnership)) &&
-                                 ((accountToUse.allowedStates).Contains(l.addrState)) &&
+                                 (accountToUse.allowedHomeOwnership.Contains(l.homeOwnership)) &&
+                                 (accountToUse.allowedStates).Contains(l.addrState) &&
                                  (!accountToUse.loanIDsOwned.Contains(l.id))
-                                 // Users want to select the highest interest rate possible from the loans that match their criteria. 
-                                 orderby l.intRate descending                                                            
+                                 orderby l.intRate descending // Users want to select the highest interest rate possible from the loans that match their criteria.                                                             
                                  select l).Take(accountToUse.numberOfLoansToInvestIn);
             
             return filteredLoans;
@@ -275,7 +274,7 @@ namespace LendingClubAPI
             List<Account> activeAccounts = new List<Account>();
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
-            string projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
+            //string projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
 
             const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
             var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
@@ -285,16 +284,29 @@ namespace LendingClubAPI
             dadRothAccount.accountTitle = "Dad's Roth Account";
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
-            dadRothAccount.amountToInvestPerLoan = 25.0;
+            dadRothAccount.amountToInvestPerLoan = 50.0;
             dadRothAccount.minimumAnnualIncome = 42000;
             dadRothAccount.maxInqLast6Months = 0;
             dadRothAccount.loanPurposesAllowed = new string[] {"debt_consolidation", "credit_card"};
             dadRothAccount.loanTermsAllowed = new int[] {36};
             dadRothAccount.allowedHomeOwnership = new string[] {"MORTGAGE", "OWN"};
             dadRothAccount.loanGradesAllowed = new string[] {"B", "C", "D"};
-            dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
-            dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
+            //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
+            //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
+            dadRothAccount.allowedStates = new[]
+            {
+                "AK", "AL", "AR", "AZ", /*"CA",*/
+                "CO", "CT", "DE", /*"FL",*/ "GA",
+                "HI", "IA", "ID", "IL", "IN",
+                "KS", "KY", "LA", "MA", "MD",
+                "ME", "MI", "MN", "MO", "MS",
+                "MT", "NC", "ND", "NE", "NH",
+                "NJ", "NM", "NV", "NY", "OH",
+                "OK", "OR", "PA", "RI", "SC",
+                "SD", "TN", /*"TX",*/ "UT", "VA",
+                "VT", "WA", "WI", "WV", "WY"
+            };
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
             dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";
             dadRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/orders";

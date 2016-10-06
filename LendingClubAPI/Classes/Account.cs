@@ -18,7 +18,7 @@ namespace LendingClubAPI
         public double accountTotal { get; set; }
 
         // Properties and/or methods I've added. 
-        public double statePercentLimit { get; set; }
+        public double statePercentLimit { get; set; } = 0.05;
         public string authorizationTokenFilePath { get; set; }
         public string notesFromCSVFilePath { get; set; }
         public double amountToInvestPerLoan { get; set; } = 25;
