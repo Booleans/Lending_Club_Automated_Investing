@@ -295,6 +295,8 @@ namespace LendingClubAPI
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
 
+            string[] statesToExclude = { "CA", "FL", "NY", "TX" };
+            dadRothAccount.allowedStates = dadRothAccount.allowedStates.Where(state => !statesToExclude.Contains(state)).ToArray();
 
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
             dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";
