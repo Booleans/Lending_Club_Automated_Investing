@@ -294,19 +294,8 @@ namespace LendingClubAPI
             //dadRothAccount.notesFromCSVFilePath = projectDirectory + @"\notes_ext.csv";
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
-            dadRothAccount.allowedStates = new[]
-            {
-                "AK", "AL", "AR", "AZ", /*"CA",*/
-                "CO", "CT", "DE", /*"FL",*/ "GA",
-                "HI", "IA", "ID", "IL", "IN",
-                "KS", "KY", "LA", "MA", "MD",
-                "ME", "MI", "MN", "MO", "MS",
-                "MT", "NC", "ND", "NE", "NH",
-                "NJ", "NM", "NV", "NY", "OH",
-                "OK", "OR", "PA", "RI", "SC",
-                "SD", "TN", /*"TX",*/ "UT", "VA",
-                "VT", "WA", "WI", "WV", "WY"
-            };
+
+
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
             dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";
             dadRothAccount.submitOrderUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/orders";
