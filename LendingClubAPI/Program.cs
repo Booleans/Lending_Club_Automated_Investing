@@ -22,7 +22,7 @@ namespace LendingClubAPI
             // Stopwatch is necessary to terminate code if new loans are not found after a set time period.
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var millisecondsUntilTermination = 30000;
+            var msUntilTermination = 30000;
 
             // Multiple accounts can access the API so we might as well run them in parallel instead of waiting for one account after the other.
             Parallel.ForEach(activeAccounts, investableAccount =>
@@ -38,7 +38,7 @@ namespace LendingClubAPI
                 Console.WriteLine("Searching for loans for the following account: {0}", investableAccount.accountTitle);
                 Console.WriteLine("Amount of cash currently available: ${0}", investableAccount.availableCash);
 
-                while (stopwatch.ElapsedMilliseconds < millisecondsUntilTermination && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
+                while (stopwatch.ElapsedMilliseconds < msUntilTermination && investableAccount.availableCash >= investableAccount.amountToInvestPerLoan)
                 {
                     // If this is the first time retrieving latest listed loans, retrieve all.
                     // Retrieve only new loans for subsequent loops. 
