@@ -145,7 +145,7 @@ namespace LendingClubAPI
         public static IEnumerable<Loan> FilterNewLoans(List<Loan> newLoans, Account accountToUse)
         {
 
-            var filteredLoans = (from l in newLoans
+            var filteredLoans = (from l in newLoans.AsParallel()
                                  where 
                                  (l.annualInc >= accountToUse.minimumAnnualIncome) &&
                                  (accountToUse.loanPurposesAllowed.Contains(l.purpose)) &&
@@ -202,7 +202,6 @@ namespace LendingClubAPI
             using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
             {
                 string json = jsonToSubmit;
-
                 streamWriter.Write(json);
             }
 
@@ -239,7 +238,6 @@ namespace LendingClubAPI
             // First line needs to be skipped because it contains column headings.  
             foreach (string note in allowedStates.Skip(1))
             {
-              
                 double principalRemainingOfNote = 0;
 
                 var noteDetails = note.Split(',');
@@ -274,10 +272,8 @@ namespace LendingClubAPI
             List<Account> activeAccounts = new List<Account>();
 
             // Find the directory of the project so we can use a relative path to the authorization token file. 
-            //string projectDirectory = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString();
-
-            const string dadRothAuthorizationTokenFilePath = @"C:\DadRothAuthorizationToken.txt";
-            var dadRothAuthorizationToken = File.ReadAllText(dadRothAuthorizationTokenFilePath);
+            string projectDirectory =  Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).ToString()).ToString()).ToString();
+            var dadRothAuthorizationToken = File.ReadAllText(projectDirectory + "\\DadRothAuthorizationToken.txt");
 
             Account dadRothAccount = GetAccountFromJson(RetrieveJsonString("https://api.lendingclub.com/api/investor/v1/accounts/77100250/summary", dadRothAuthorizationToken));
 
@@ -285,7 +281,7 @@ namespace LendingClubAPI
             dadRothAccount.authorizationToken = dadRothAuthorizationToken;
             dadRothAccount.statePercentLimit = 0.05;
             dadRothAccount.amountToInvestPerLoan = 50.0;
-            dadRothAccount.minimumAnnualIncome = 42000;
+            dadRothAccount.minimumAnnualIncome = 60000;
             dadRothAccount.maxInqLast6Months = 0;
             dadRothAccount.loanPurposesAllowed = new string[] {"debt_consolidation", "credit_card"};
             dadRothAccount.loanTermsAllowed = new int[] {36};
@@ -295,8 +291,8 @@ namespace LendingClubAPI
             //dadRothAccount.allowedStates = CalculateAndSetAllowedStatesFromCsv(dadRothAccount.notesFromCSVFilePath, dadRothAccount.statePercentLimit, dadRothAccount.accountTotal);
             dadRothAccount.numberOfLoansToInvestIn = (int)(dadRothAccount.availableCash / dadRothAccount.amountToInvestPerLoan);
 
-            string[] statesToExclude = { "CA", "FL", "NY", "TX" };
-            dadRothAccount.allowedStates = dadRothAccount.allowedStates.Where(state => !statesToExclude.Contains(state)).ToArray();
+            dadRothAccount.statesToExclude = new string[] { "CA", "FL", "TX", "NY" };
+            dadRothAccount.allowedStates = dadRothAccount.allowedStates.Where(state => !dadRothAccount.statesToExclude.Contains(state)).ToArray();
 
             dadRothAccount.detailedNotesOwnedUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/detailednotes";
             dadRothAccount.accountSummaryUrl = "https://api.lendingclub.com/api/investor/v1/accounts/" + dadRothAccount.investorID + "/summary";

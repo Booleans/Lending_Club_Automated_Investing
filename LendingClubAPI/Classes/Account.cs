@@ -52,5 +52,6 @@ namespace LendingClubAPI
             "wedding", "vacation", "moving", "house", "car", "major_purchase", "credit_card", "other"
         };
         public int maxDelinqLast2Years { get; set; } = 0;
+        public string[] statesToExclude { get; set; } = {};
     }
 }
