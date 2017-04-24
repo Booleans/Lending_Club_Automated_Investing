@@ -31,8 +31,8 @@ you would like to invest per loan. This should be in increments of $25.
 
 You can assign the following properties to the account object in order to filter and purchase loans based off of custom criteria:
 
-```minimumInterestRate, minimumAnnualIncome, maxInquiriesLast6Months, loanPurposesAllowed, maximumRevolvingBalance, loanTermsAllowed,
-allowedHomeOwnership, and loanGradesAllowed```.
+minimumInterestRate, minimumAnnualIncome, maxInquiriesLast6Months, loanPurposesAllowed, maximumRevolvingBalance, loanTermsAllowed,
+allowedHomeOwnership, and loanGradesAllowed.
 
 The code will then filter and purchase loans based off the criteria you have provided in the above properties. 
 
